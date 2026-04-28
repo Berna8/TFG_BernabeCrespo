@@ -1,0 +1,15 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# IDE
+.idea/
+
+# Gradle
+*.iml
+.gradle
+local.properties
+build/
+
+# Google Services
+google-services.json

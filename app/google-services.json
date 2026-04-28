@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "253339083980",
+    "project_id": "autocita-afe71",
+    "storage_bucket": "autocita-afe71.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:253339083980:android:c205d10aacd13e327ace69",
+        "android_client_info": {
+          "package_name": "com.berna8.tfg"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWezBcVDVPTDQKFauCKg6_v1FlPgMiJQc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
