@@ -13,7 +13,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun LoginScreen(
-    onLoginExitoso: (String) -> Unit,
+    onLoginExitoso: (String, String) -> Unit,
     onIrARegistro: () -> Unit,
     viewModel: AuthViewModel = viewModel()
 ) {
@@ -24,7 +24,7 @@ fun LoginScreen(
 
     LaunchedEffect(estado) {
         if (estado is AuthEstado.Exito) {
-            onLoginExitoso((estado as AuthEstado.Exito).rol)
+            onLoginExitoso((estado as AuthEstado.Exito).rol, (estado as AuthEstado.Exito).uid)
             viewModel.resetearEstado()
         }
     }

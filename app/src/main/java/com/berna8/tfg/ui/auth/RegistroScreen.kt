@@ -13,7 +13,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun RegistroScreen(
-    onRegistroExitoso: (String) -> Unit,
+    onRegistroExitoso: (String, String) -> Unit,
     onIrALogin: () -> Unit,
     viewModel: AuthViewModel = viewModel()
 ) {
@@ -26,7 +26,7 @@ fun RegistroScreen(
 
     LaunchedEffect(estado) {
         if (estado is AuthEstado.Exito) {
-            onRegistroExitoso((estado as AuthEstado.Exito).rol)
+            onRegistroExitoso((estado as AuthEstado.Exito).rol, (estado as AuthEstado.Exito).uid)
             viewModel.resetearEstado()
         }
     }

@@ -8,12 +8,14 @@ import com.berna8.tfg.ui.auth.LoginScreen
 import com.berna8.tfg.ui.auth.RegistroScreen
 import com.berna8.tfg.ui.home.HomeClienteScreen
 import com.berna8.tfg.ui.home.HomeTallerScreen
+import com.berna8.tfg.ui.reserva.NuevaReservaScreen
 
 object Rutas {
     const val LOGIN = "login"
     const val REGISTRO = "registro"
-    const val HOME_CLIENTE = "home_cliente"
-    const val HOME_TALLER = "home_taller"
+    const val HOME_CLIENTE = "home_cliente/{uid}"
+    const val HOME_TALLER = "home_taller/{uid}"
+    const val NUEVA_RESERVA = "nueva_reserva/{uid}"
 }
 
 @Composable
@@ -26,13 +28,13 @@ fun NavegacionApp() {
     ) {
         composable(Rutas.LOGIN) {
             LoginScreen(
-                onLoginExitoso = { rol ->
+                onLoginExitoso = { rol, uid ->
                     if (rol == "taller") {
-                        navController.navigate(Rutas.HOME_TALLER) {
+                        navController.navigate("home_taller/$uid") {
                             popUpTo(Rutas.LOGIN) { inclusive = true }
                         }
                     } else {
-                        navController.navigate(Rutas.HOME_CLIENTE) {
+                        navController.navigate("home_cliente/$uid") {
                             popUpTo(Rutas.LOGIN) { inclusive = true }
                         }
                     }
@@ -45,13 +47,13 @@ fun NavegacionApp() {
 
         composable(Rutas.REGISTRO) {
             RegistroScreen(
-                onRegistroExitoso = { rol ->
+                onRegistroExitoso = { rol, uid ->
                     if (rol == "taller") {
-                        navController.navigate(Rutas.HOME_TALLER) {
+                        navController.navigate("home_taller/$uid") {
                             popUpTo(Rutas.LOGIN) { inclusive = true }
                         }
                     } else {
-                        navController.navigate(Rutas.HOME_CLIENTE) {
+                        navController.navigate("home_cliente/$uid") {
                             popUpTo(Rutas.LOGIN) { inclusive = true }
                         }
                     }
@@ -62,25 +64,42 @@ fun NavegacionApp() {
             )
         }
 
-        composable(Rutas.HOME_CLIENTE) {
+        composable(Rutas.HOME_CLIENTE) { backStackEntry ->
+            val uid = backStackEntry.arguments?.getString("uid") ?: ""
             HomeClienteScreen(
+                clienteUid = uid,
                 onCerrarSesion = {
                     navController.navigate(Rutas.LOGIN) {
-                        popUpTo(Rutas.HOME_CLIENTE) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 },
                 onNuevaReserva = {
-                    // Próximamente
+                    navController.navigate("nueva_reserva/$uid")
                 }
             )
         }
 
-        composable(Rutas.HOME_TALLER) {
+        composable(Rutas.HOME_TALLER) { backStackEntry ->
+            val uid = backStackEntry.arguments?.getString("uid") ?: ""
             HomeTallerScreen(
+                tallerUid = uid,
                 onCerrarSesion = {
                     navController.navigate(Rutas.LOGIN) {
-                        popUpTo(Rutas.HOME_TALLER) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        composable(Rutas.NUEVA_RESERVA) { backStackEntry ->
+            val uid = backStackEntry.arguments?.getString("uid") ?: ""
+            NuevaReservaScreen(
+                clienteUid = uid,
+                onReservaCreada = {
+                    navController.popBackStack()
+                },
+                onVolver = {
+                    navController.popBackStack()
                 }
             )
         }

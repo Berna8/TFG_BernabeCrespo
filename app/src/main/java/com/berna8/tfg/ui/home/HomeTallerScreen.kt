@@ -8,31 +8,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berna8.tfg.data.model.Reserva
+import com.berna8.tfg.ui.reserva.ReservaEstado
+import com.berna8.tfg.ui.reserva.ReservaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTallerScreen(
-    onCerrarSesion: () -> Unit
+    tallerUid: String,
+    onCerrarSesion: () -> Unit,
+    viewModel: ReservaViewModel = viewModel()
 ) {
-    // Lista de reservas de prueba por ahora
-    val reservas = remember {
-        listOf(
-            Reserva(
-                id = "1",
-                servicio = "Cambio de aceite",
-                fecha = "05/05/2025",
-                hora = "10:00",
-                estado = "pendiente"
-            ),
-            Reserva(
-                id = "2",
-                servicio = "Revisión de frenos",
-                fecha = "10/05/2025",
-                hora = "12:00",
-                estado = "confirmada"
-            )
-        )
+    val reservas by viewModel.reservas.collectAsState()
+    val estado by viewModel.estado.collectAsState()
+
+    LaunchedEffect(tallerUid) {
+        viewModel.cargarReservasTaller(tallerUid)
     }
 
     Scaffold(
@@ -47,25 +39,46 @@ fun HomeTallerScreen(
             )
         }
     ) { paddingValues ->
-        if (reservas.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("No hay citas programadas")
+        when {
+            estado is ReservaEstado.Cargando -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(reservas) { reserva ->
-                    TarjetaReservaTaller(reserva = reserva)
+            reservas.isEmpty() -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No hay citas programadas")
+                }
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(reservas) { reserva ->
+                        TarjetaReservaTaller(
+                            reserva = reserva,
+                            onConfirmar = {
+                                viewModel.confirmarReserva(reserva.id, tallerUid)
+                            },
+                            onCancelar = {
+                                viewModel.cancelarReserva(reserva.id, tallerUid, true)
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -73,7 +86,11 @@ fun HomeTallerScreen(
 }
 
 @Composable
-fun TarjetaReservaTaller(reserva: Reserva) {
+fun TarjetaReservaTaller(
+    reserva: Reserva,
+    onConfirmar: () -> Unit,
+    onCancelar: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -88,6 +105,26 @@ fun TarjetaReservaTaller(reserva: Reserva) {
             Text(text = "Fecha: ${reserva.fecha} a las ${reserva.hora}")
             Spacer(modifier = Modifier.height(4.dp))
             EstadoChip(estado = reserva.estado)
+            if (reserva.estado == "pendiente") {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onCancelar,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Cancelar")
+                    }
+                    Button(
+                        onClick = onConfirmar,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Confirmar")
+                    }
+                }
+            }
         }
     }
 }

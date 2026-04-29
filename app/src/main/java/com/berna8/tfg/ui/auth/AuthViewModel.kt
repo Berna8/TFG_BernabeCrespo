@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 sealed class AuthEstado {
     object Inactivo : AuthEstado()
     object Cargando : AuthEstado()
-    data class Exito(val rol: String) : AuthEstado()
+    data class Exito(val rol: String, val uid: String) : AuthEstado()
     data class Error(val mensaje: String) : AuthEstado()
 }
 
@@ -26,7 +26,8 @@ class AuthViewModel : ViewModel() {
             _estado.value = AuthEstado.Cargando
             val resultado = repositorio.login(email, password)
             _estado.value = if (resultado.isSuccess) {
-                AuthEstado.Exito(resultado.getOrDefault("cliente"))
+                val rol = resultado.getOrDefault("cliente")
+                AuthEstado.Exito(rol, repositorio.obtenerUidActual() ?: "")
             } else {
                 AuthEstado.Error(resultado.exceptionOrNull()?.message ?: "Error desconocido")
             }
@@ -38,7 +39,7 @@ class AuthViewModel : ViewModel() {
             _estado.value = AuthEstado.Cargando
             val resultado = repositorio.registrar(nombre, email, password, rol)
             _estado.value = if (resultado.isSuccess) {
-                AuthEstado.Exito(rol)
+                AuthEstado.Exito(rol, repositorio.obtenerUidActual() ?: "")
             } else {
                 AuthEstado.Error(resultado.exceptionOrNull()?.message ?: "Error desconocido")
             }
