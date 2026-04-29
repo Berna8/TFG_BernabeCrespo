@@ -6,6 +6,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.berna8.tfg.ui.auth.LoginScreen
 import com.berna8.tfg.ui.auth.RegistroScreen
+import com.berna8.tfg.ui.home.HomeClienteScreen
+import com.berna8.tfg.ui.home.HomeTallerScreen
 
 object Rutas {
     const val LOGIN = "login"
@@ -61,11 +63,26 @@ fun NavegacionApp() {
         }
 
         composable(Rutas.HOME_CLIENTE) {
-            // Próximamente
+            HomeClienteScreen(
+                onCerrarSesion = {
+                    navController.navigate(Rutas.LOGIN) {
+                        popUpTo(Rutas.HOME_CLIENTE) { inclusive = true }
+                    }
+                },
+                onNuevaReserva = {
+                    // Próximamente
+                }
+            )
         }
 
         composable(Rutas.HOME_TALLER) {
-            // Próximamente
+            HomeTallerScreen(
+                onCerrarSesion = {
+                    navController.navigate(Rutas.LOGIN) {
+                        popUpTo(Rutas.HOME_TALLER) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }
