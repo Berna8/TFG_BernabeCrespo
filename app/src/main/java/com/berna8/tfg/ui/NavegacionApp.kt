@@ -9,13 +9,17 @@ import com.berna8.tfg.ui.auth.RegistroScreen
 import com.berna8.tfg.ui.home.HomeClienteScreen
 import com.berna8.tfg.ui.home.HomeTallerScreen
 import com.berna8.tfg.ui.reserva.NuevaReservaScreen
+import com.berna8.tfg.ui.taller.ListaTalleresScreen
+import com.berna8.tfg.ui.taller.PerfilTallerScreen
 
 object Rutas {
     const val LOGIN = "login"
     const val REGISTRO = "registro"
     const val HOME_CLIENTE = "home_cliente/{uid}"
     const val HOME_TALLER = "home_taller/{uid}"
-    const val NUEVA_RESERVA = "nueva_reserva/{uid}"
+    const val NUEVA_RESERVA = "nueva_reserva/{uid}/{tallerUid}"
+    const val PERFIL_TALLER = "perfil_taller/{uid}"
+    const val LISTA_TALLERES = "lista_talleres/{uid}"
 }
 
 @Composable
@@ -74,7 +78,7 @@ fun NavegacionApp() {
                     }
                 },
                 onNuevaReserva = {
-                    navController.navigate("nueva_reserva/$uid")
+                    navController.navigate("lista_talleres/$uid")
                 }
             )
         }
@@ -87,18 +91,44 @@ fun NavegacionApp() {
                     navController.navigate(Rutas.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                onEditarPerfil = {
+                    navController.navigate("perfil_taller/$uid")
+                }
+            )
+        }
+
+        composable(Rutas.LISTA_TALLERES) { backStackEntry ->
+            val uid = backStackEntry.arguments?.getString("uid") ?: ""
+            ListaTalleresScreen(
+                onTallerSeleccionado = { tallerUid ->
+                    navController.navigate("nueva_reserva/$uid/$tallerUid")
                 }
             )
         }
 
         composable(Rutas.NUEVA_RESERVA) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
+            val tallerUid = backStackEntry.arguments?.getString("tallerUid") ?: ""
             NuevaReservaScreen(
                 clienteUid = uid,
+                tallerUid = tallerUid,
                 onReservaCreada = {
-                    navController.popBackStack()
+                    navController.navigate("home_cliente/$uid") {
+                        popUpTo("home_cliente/$uid") { inclusive = true }
+                    }
                 },
                 onVolver = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Rutas.PERFIL_TALLER) { backStackEntry ->
+            val uid = backStackEntry.arguments?.getString("uid") ?: ""
+            PerfilTallerScreen(
+                tallerUid = uid,
+                onGuardado = {
                     navController.popBackStack()
                 }
             )

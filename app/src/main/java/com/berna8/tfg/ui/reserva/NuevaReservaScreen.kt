@@ -11,35 +11,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berna8.tfg.data.model.Reserva
+import com.berna8.tfg.ui.taller.TallerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NuevaReservaScreen(
     clienteUid: String,
+    tallerUid: String,
     onReservaCreada: () -> Unit,
     onVolver: () -> Unit,
-    viewModel: ReservaViewModel = viewModel()
+    reservaViewModel: ReservaViewModel = viewModel(),
+    tallerViewModel: TallerViewModel = viewModel()
 ) {
-    val estado by viewModel.estado.collectAsState()
+    val estado by reservaViewModel.estado.collectAsState()
+    val taller by tallerViewModel.taller.collectAsState()
 
     var servicio by remember { mutableStateOf("") }
     var fecha by remember { mutableStateOf("") }
     var hora by remember { mutableStateOf("") }
     var servicioExpandido by remember { mutableStateOf(false) }
 
-    val servicios = listOf(
-        "Cambio de aceite",
-        "Revisión de frenos",
-        "Cambio de neumáticos",
-        "Revisión general",
-        "Cambio de batería",
-        "Alineación y equilibrado"
-    )
+    LaunchedEffect(tallerUid) {
+        tallerViewModel.cargarTaller(tallerUid)
+    }
 
     LaunchedEffect(estado) {
         if (estado is ReservaEstado.Exito) {
             onReservaCreada()
-            viewModel.resetearEstado()
+            reservaViewModel.resetearEstado()
         }
     }
 
@@ -63,10 +62,24 @@ fun NuevaReservaScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            taller?.let {
+                Text(
+                    text = it.nombre,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Text(
+                    text = it.direccion,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             Text(
                 text = "Selecciona el servicio",
                 style = MaterialTheme.typography.titleMedium
             )
+
+            val servicios = taller?.servicios ?: emptyList()
 
             ExposedDropdownMenuBox(
                 expanded = servicioExpandido,
@@ -123,9 +136,10 @@ fun NuevaReservaScreen(
 
             Button(
                 onClick = {
-                    viewModel.crearReserva(
+                    reservaViewModel.crearReserva(
                         Reserva(
                             clienteUid = clienteUid,
+                            tallerUid = tallerUid,
                             servicio = servicio,
                             fecha = fecha,
                             hora = hora

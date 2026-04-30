@@ -18,6 +18,7 @@ import com.berna8.tfg.ui.reserva.ReservaViewModel
 fun HomeTallerScreen(
     tallerUid: String,
     onCerrarSesion: () -> Unit,
+    onEditarPerfil: () -> Unit,
     viewModel: ReservaViewModel = viewModel()
 ) {
     val reservas by viewModel.reservas.collectAsState()
@@ -32,12 +33,15 @@ fun HomeTallerScreen(
             TopAppBar(
                 title = { Text("Citas del taller") },
                 actions = {
+                    TextButton(onClick = onEditarPerfil) {
+                        Text("Mi perfil")
+                    }
                     TextButton(onClick = onCerrarSesion) {
                         Text("Salir")
                     }
                 }
             )
-        }
+        },
     ) { paddingValues ->
         when {
             estado is ReservaEstado.Cargando -> {
