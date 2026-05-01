@@ -2,10 +2,20 @@ package com.berna8.tfg.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Colores principales AutoCita
+val AzulPrimario = Color(0xFF1565C0)
+val AzulClaro = Color(0xFF5E92F3)
+val AzulOscuro = Color(0xFF003C8F)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val NaranjaSecundario = Color(0xFFFF6F00)
+val NaranjaClaro = Color(0xFFFFa040)
+val NaranjaOscuro = Color(0xFFC43E00)
+
+val GrisClaro = Color(0xFFF5F5F5)
+val GrisMedio = Color(0xFF9E9E9E)
+val Blanco = Color(0xFFFFFFFF)
+val Negro = Color(0xFF212121)
+
+val Verde = Color(0xFF2E7D32)
+val Rojo = Color(0xFFC62828)
+val Amarillo = Color(0xFFF9A825)
