@@ -15,6 +15,7 @@ import com.berna8.tfg.ui.reserva.NuevaReservaScreen
 import com.berna8.tfg.ui.taller.ListaTalleresScreen
 import com.berna8.tfg.ui.taller.PerfilTallerScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.berna8.tfg.ui.reserva.HistorialCitasScreen
 
 object Rutas {
     const val LOGIN = "login"
@@ -26,6 +27,8 @@ object Rutas {
     const val PERFIL_TALLER = "perfil_taller/{uid}"
     const val LISTA_TALLERES = "lista_talleres/{uid}"
     const val CUENTA = "cuenta/{uid}"
+
+    const val HISTORIAL_CITAS = "historial_citas/{uid}"
 }
 
 @Composable
@@ -104,6 +107,9 @@ fun NavegacionApp() {
                 },
                 onIrACuenta = {
                     navController.navigate("cuenta/$uid")
+                },
+                        onVerHistorial = {
+                    navController.navigate("historial_citas/$uid")
                 }
             )
         }
@@ -167,6 +173,16 @@ fun NavegacionApp() {
                     navController.navigate(Rutas.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        composable(Rutas.HISTORIAL_CITAS) { backStackEntry ->
+            val uid = backStackEntry.arguments?.getString("uid") ?: ""
+            HistorialCitasScreen(
+                clienteUid = uid,
+                onVolver = {
+                    navController.popBackStack()
                 }
             )
         }

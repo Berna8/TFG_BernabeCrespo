@@ -1,0 +1,168 @@
+package com.berna8.tfg.ui.reserva
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.berna8.tfg.data.model.Reserva
+import com.berna8.tfg.ui.home.EstadoChip
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HistorialCitasScreen(
+    clienteUid: String,
+    onVolver: () -> Unit,
+    viewModel: ReservaViewModel = viewModel()
+) {
+    val reservas by viewModel.reservas.collectAsState()
+    val estado by viewModel.estado.collectAsState()
+
+    val citasPasadas = reservas.filter { it.estado == "cancelada" }
+    val citasFuturas = reservas.filter { it.estado != "cancelada" }
+
+    LaunchedEffect(clienteUid) {
+        viewModel.cargarReservasCliente(clienteUid)
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Mis citas") },
+                navigationIcon = {
+                    IconButton(onClick = onVolver) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        when {
+            estado is ReservaEstado.Cargando -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            reservas.isEmpty() -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "📋",
+                            style = MaterialTheme.typography.headlineLarge
+                        )
+                        Text(
+                            text = "No tienes citas",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(vertical = 16.dp)
+                ) {
+                    if (citasFuturas.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "Próximas citas",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        items(citasFuturas) { reserva ->
+                            TarjetaHistorial(reserva = reserva)
+                        }
+                    }
+
+                    if (citasPasadas.isNotEmpty()) {
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Citas anteriores",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                        items(citasPasadas) { reserva ->
+                            TarjetaHistorial(reserva = reserva)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TarjetaHistorial(reserva: Reserva) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = reserva.servicio,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                EstadoChip(estado = reserva.estado)
+            }
+
+            HorizontalDivider()
+
+            Text(
+                text = "📅 ${reserva.fecha} a las ${reserva.hora}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            if (reserva.marcaCoche.isNotBlank()) {
+                Text(
+                    text = "🚗 ${reserva.marcaCoche} ${reserva.modeloCoche} - ${reserva.matriculaCoche}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+}

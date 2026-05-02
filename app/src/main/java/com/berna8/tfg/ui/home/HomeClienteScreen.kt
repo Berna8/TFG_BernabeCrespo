@@ -28,6 +28,7 @@ fun HomeClienteScreen(
     onCerrarSesion: () -> Unit,
     onNuevaReserva: () -> Unit,
     onIrACuenta: () -> Unit,
+    onVerHistorial: () -> Unit,
     viewModel: ReservaViewModel = viewModel()
 ) {
     val reservas by viewModel.reservas.collectAsState()
@@ -66,6 +67,12 @@ fun HomeClienteScreen(
                             Icons.AutoMirrored.Filled.ExitToApp,
                             contentDescription = "Salir",
                             tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                    IconButton(onClick = onVerHistorial) {
+                        Icon(
+                            Icons.Default.DateRange,
+                            contentDescription = "Historial"
                         )
                     }
                 },
