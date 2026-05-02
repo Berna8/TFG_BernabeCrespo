@@ -7,5 +7,8 @@ data class Reserva(
     val servicio: String = "",
     val fecha: String = "",
     val hora: String = "",
-    val estado: String = "pendiente" // "pendiente", "confirmada", "cancelada"
+    val estado: String = "pendiente", // "pendiente", "confirmada", "cancelada"
+    val marcaCoche: String = "",
+    val modeloCoche: String = "",
+    val matriculaCoche: String = ""
 )

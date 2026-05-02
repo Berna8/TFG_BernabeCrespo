@@ -4,27 +4,34 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.berna8.tfg.ui.auth.AuthViewModel
+import com.berna8.tfg.ui.auth.CuentaScreen
 import com.berna8.tfg.ui.auth.LoginScreen
 import com.berna8.tfg.ui.auth.RegistroScreen
+import com.berna8.tfg.ui.auth.VerificacionEmailScreen
 import com.berna8.tfg.ui.home.HomeClienteScreen
 import com.berna8.tfg.ui.home.HomeTallerScreen
 import com.berna8.tfg.ui.reserva.NuevaReservaScreen
 import com.berna8.tfg.ui.taller.ListaTalleresScreen
 import com.berna8.tfg.ui.taller.PerfilTallerScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 object Rutas {
     const val LOGIN = "login"
     const val REGISTRO = "registro"
+    const val VERIFICACION_EMAIL = "verificacion_email"
     const val HOME_CLIENTE = "home_cliente/{uid}"
     const val HOME_TALLER = "home_taller/{uid}"
     const val NUEVA_RESERVA = "nueva_reserva/{uid}/{tallerUid}"
     const val PERFIL_TALLER = "perfil_taller/{uid}"
     const val LISTA_TALLERES = "lista_talleres/{uid}"
+    const val CUENTA = "cuenta/{uid}"
 }
 
 @Composable
 fun NavegacionApp() {
     val navController = rememberNavController()
+    val authViewModel: AuthViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -45,26 +52,41 @@ fun NavegacionApp() {
                 },
                 onIrARegistro = {
                     navController.navigate(Rutas.REGISTRO)
-                }
+                },
+                onEmailNoVerificado = {
+                    navController.navigate(Rutas.VERIFICACION_EMAIL)
+                },
+                viewModel = authViewModel
             )
         }
 
         composable(Rutas.REGISTRO) {
             RegistroScreen(
-                onRegistroExitoso = { rol, uid ->
-                    if (rol == "taller") {
-                        navController.navigate("home_taller/$uid") {
-                            popUpTo(Rutas.LOGIN) { inclusive = true }
-                        }
-                    } else {
-                        navController.navigate("home_cliente/$uid") {
-                            popUpTo(Rutas.LOGIN) { inclusive = true }
-                        }
+                onRegistroExitoso = { _, _ ->
+                    navController.navigate(Rutas.VERIFICACION_EMAIL) {
+                        popUpTo(Rutas.REGISTRO) { inclusive = true }
                     }
                 },
                 onIrALogin = {
                     navController.popBackStack()
-                }
+                },
+                viewModel = authViewModel
+            )
+        }
+
+        composable(Rutas.VERIFICACION_EMAIL) {
+            VerificacionEmailScreen(
+                onEmailVerificado = {
+                    navController.navigate(Rutas.LOGIN) {
+                        popUpTo(Rutas.VERIFICACION_EMAIL) { inclusive = true }
+                    }
+                },
+                onVolver = {
+                    navController.navigate(Rutas.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                viewModel = authViewModel
             )
         }
 
@@ -79,6 +101,9 @@ fun NavegacionApp() {
                 },
                 onNuevaReserva = {
                     navController.navigate("lista_talleres/$uid")
+                },
+                onIrACuenta = {
+                    navController.navigate("cuenta/$uid")
                 }
             )
         }
@@ -130,6 +155,18 @@ fun NavegacionApp() {
                 tallerUid = uid,
                 onGuardado = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Rutas.CUENTA) { backStackEntry ->
+            val uid = backStackEntry.arguments?.getString("uid") ?: ""
+            CuentaScreen(
+                uid = uid,
+                onCerrarSesion = {
+                    navController.navigate(Rutas.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }

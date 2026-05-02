@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +18,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berna8.tfg.data.model.Reserva
 import com.berna8.tfg.ui.reserva.ReservaEstado
 import com.berna8.tfg.ui.reserva.ReservaViewModel
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Person
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,6 +27,7 @@ fun HomeClienteScreen(
     clienteUid: String,
     onCerrarSesion: () -> Unit,
     onNuevaReserva: () -> Unit,
+    onIrACuenta: () -> Unit,
     viewModel: ReservaViewModel = viewModel()
 ) {
     val reservas by viewModel.reservas.collectAsState()
@@ -53,9 +55,15 @@ fun HomeClienteScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onIrACuenta) {
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = "Cuenta"
+                        )
+                    }
                     IconButton(onClick = onCerrarSesion) {
                         Icon(
-                            Icons.Default.ExitToApp,
+                            Icons.AutoMirrored.Filled.ExitToApp,
                             contentDescription = "Salir",
                             tint = MaterialTheme.colorScheme.error
                         )

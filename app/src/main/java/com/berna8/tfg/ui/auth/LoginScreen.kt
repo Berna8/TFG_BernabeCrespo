@@ -21,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun LoginScreen(
     onLoginExitoso: (String, String) -> Unit,
     onIrARegistro: () -> Unit,
+    onEmailNoVerificado: () -> Unit,
     viewModel: AuthViewModel = viewModel()
 ) {
     val estado by viewModel.estado.collectAsState()
@@ -29,12 +30,19 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
 
     LaunchedEffect(estado) {
-        if (estado is AuthEstado.Exito) {
-            onLoginExitoso(
-                (estado as AuthEstado.Exito).rol,
-                (estado as AuthEstado.Exito).uid
-            )
-            viewModel.resetearEstado()
+        when (estado) {
+            is AuthEstado.Exito -> {
+                onLoginExitoso(
+                    (estado as AuthEstado.Exito).rol,
+                    (estado as AuthEstado.Exito).uid
+                )
+                viewModel.resetearEstado()
+            }
+            is AuthEstado.EmailNoVerificado -> {
+                onEmailNoVerificado()
+                viewModel.resetearEstado()
+            }
+            else -> {}
         }
     }
 
