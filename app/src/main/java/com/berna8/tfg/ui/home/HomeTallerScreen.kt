@@ -5,10 +5,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +25,7 @@ fun HomeTallerScreen(
     tallerUid: String,
     onCerrarSesion: () -> Unit,
     onEditarPerfil: () -> Unit,
+    onIrACuenta: () -> Unit,
     viewModel: ReservaViewModel = viewModel()
 ) {
     val reservas by viewModel.reservas.collectAsState()
@@ -55,16 +55,15 @@ fun HomeTallerScreen(
                 actions = {
                     IconButton(onClick = onEditarPerfil) {
                         Icon(
-                            Icons.Default.Edit,
+                            Icons.Default.Build,
                             contentDescription = "Editar perfil",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                    IconButton(onClick = onCerrarSesion) {
+                    IconButton(onClick = onIrACuenta) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = "Salir",
-                            tint = MaterialTheme.colorScheme.error
+                            Icons.Default.Person,
+                            contentDescription = "Cuenta"
                         )
                     }
                 },

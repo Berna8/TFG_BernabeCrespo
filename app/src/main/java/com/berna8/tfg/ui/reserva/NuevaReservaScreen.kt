@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -14,6 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berna8.tfg.data.model.Reserva
 import com.berna8.tfg.ui.taller.TallerViewModel
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,12 +33,22 @@ fun NuevaReservaScreen(
     val taller by tallerViewModel.taller.collectAsState()
 
     var servicio by remember { mutableStateOf("") }
-    var fecha by remember { mutableStateOf("") }
-    var hora by remember { mutableStateOf("") }
     var marcaCoche by remember { mutableStateOf("") }
     var modeloCoche by remember { mutableStateOf("") }
     var matriculaCoche by remember { mutableStateOf("") }
     var servicioExpandido by remember { mutableStateOf(false) }
+
+    var mostrarDatePicker by remember { mutableStateOf(false) }
+    var mostrarTimePicker by remember { mutableStateOf(false) }
+
+    var fechaSeleccionada by remember { mutableStateOf<LocalDate?>(null) }
+    var horaSeleccionada by remember { mutableStateOf<LocalTime?>(null) }
+
+    val fechaFormateada = fechaSeleccionada?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: ""
+    val horaFormateada = horaSeleccionada?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
+
+    val datePickerState = rememberDatePickerState()
+    val timePickerState = rememberTimePickerState()
 
     LaunchedEffect(tallerUid) {
         tallerViewModel.cargarTaller(tallerUid)
@@ -45,6 +59,51 @@ fun NuevaReservaScreen(
             onReservaCreada()
             reservaViewModel.resetearEstado()
         }
+    }
+
+    if (mostrarDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { mostrarDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        fechaSeleccionada = LocalDate.ofEpochDay(millis / 86400000)
+                    }
+                    mostrarDatePicker = false
+                }) {
+                    Text("Aceptar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDatePicker = false }) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    if (mostrarTimePicker) {
+        AlertDialog(
+            onDismissRequest = { mostrarTimePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    horaSeleccionada = LocalTime.of(timePickerState.hour, timePickerState.minute)
+                    mostrarTimePicker = false
+                }) {
+                    Text("Aceptar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarTimePicker = false }) {
+                    Text("Cancelar")
+                }
+            },
+            text = {
+                TimePicker(state = timePickerState)
+            }
+        )
     }
 
     Scaffold(
@@ -70,7 +129,6 @@ fun NuevaReservaScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Info del taller
             taller?.let {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -94,7 +152,6 @@ fun NuevaReservaScreen(
                 }
             }
 
-            // Servicio
             Text(
                 text = "Servicio",
                 style = MaterialTheme.typography.titleMedium,
@@ -136,7 +193,6 @@ fun NuevaReservaScreen(
                 }
             }
 
-            // Fecha y hora
             Text(
                 text = "Fecha y hora",
                 style = MaterialTheme.typography.titleMedium,
@@ -144,22 +200,33 @@ fun NuevaReservaScreen(
             )
 
             OutlinedTextField(
-                value = fecha,
-                onValueChange = { fecha = it },
-                label = { Text("Fecha (DD/MM/AAAA)") },
+                value = fechaFormateada,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Fecha") },
+                trailingIcon = {
+                    IconButton(onClick = { mostrarDatePicker = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             )
 
             OutlinedTextField(
-                value = hora,
-                onValueChange = { hora = it },
-                label = { Text("Hora (HH:MM)") },
+                value = horaFormateada,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Hora") },
+                trailingIcon = {
+                    IconButton(onClick = { mostrarTimePicker = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Seleccionar hora")
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             )
 
-            // Datos del coche
             Text(
                 text = "Datos del vehículo",
                 style = MaterialTheme.typography.titleMedium,
@@ -212,8 +279,8 @@ fun NuevaReservaScreen(
                             clienteUid = clienteUid,
                             tallerUid = tallerUid,
                             servicio = servicio,
-                            fecha = fecha,
-                            hora = hora,
+                            fecha = fechaFormateada,
+                            hora = horaFormateada,
                             marcaCoche = marcaCoche,
                             modeloCoche = modeloCoche,
                             matriculaCoche = matriculaCoche
@@ -222,8 +289,8 @@ fun NuevaReservaScreen(
                 },
                 enabled = estado !is ReservaEstado.Cargando &&
                         servicio.isNotBlank() &&
-                        fecha.isNotBlank() &&
-                        hora.isNotBlank() &&
+                        fechaFormateada.isNotBlank() &&
+                        horaFormateada.isNotBlank() &&
                         marcaCoche.isNotBlank() &&
                         modeloCoche.isNotBlank() &&
                         matriculaCoche.isNotBlank(),

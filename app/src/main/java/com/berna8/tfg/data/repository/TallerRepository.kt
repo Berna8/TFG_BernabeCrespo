@@ -31,7 +31,9 @@ class TallerRepository {
 
     suspend fun obtenerTodosTalleres(): Result<List<Taller>> {
         return try {
-            val resultado = coleccion.get().await()
+            val resultado = coleccion
+                .get(com.google.firebase.firestore.Source.SERVER)
+                .await()
             val talleres = resultado.toObjects(Taller::class.java)
             Result.success(talleres)
         } catch (e: Exception) {
@@ -47,4 +49,6 @@ class TallerRepository {
             Result.failure(e)
         }
     }
+
+
 }

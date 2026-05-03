@@ -18,7 +18,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berna8.tfg.data.model.Reserva
 import com.berna8.tfg.ui.reserva.ReservaEstado
 import com.berna8.tfg.ui.reserva.ReservaViewModel
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Person
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,13 +59,6 @@ fun HomeClienteScreen(
                         Icon(
                             Icons.Default.Person,
                             contentDescription = "Cuenta"
-                        )
-                    }
-                    IconButton(onClick = onCerrarSesion) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = "Salir",
-                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                     IconButton(onClick = onVerHistorial) {

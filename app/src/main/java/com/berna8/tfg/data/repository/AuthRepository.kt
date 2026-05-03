@@ -93,4 +93,13 @@ class AuthRepository {
     fun obtenerUidActual(): String? {
         return auth.currentUser?.uid
     }
+
+    suspend fun obtenerRol(uid: String): String {
+        return try {
+            val doc = firestore.collection("usuarios").document(uid).get().await()
+            doc.getString("rol") ?: "cliente"
+        } catch (e: Exception) {
+            "cliente"
+        }
+    }
 }

@@ -1,21 +1,24 @@
 package com.berna8.tfg.ui
 
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.berna8.tfg.ui.auth.AuthViewModel
-import com.berna8.tfg.ui.auth.CuentaScreen
-import com.berna8.tfg.ui.auth.LoginScreen
-import com.berna8.tfg.ui.auth.RegistroScreen
-import com.berna8.tfg.ui.auth.VerificacionEmailScreen
+import com.berna8.tfg.data.repository.AuthRepository
+import com.berna8.tfg.ui.auth.*
 import com.berna8.tfg.ui.home.HomeClienteScreen
 import com.berna8.tfg.ui.home.HomeTallerScreen
+import com.berna8.tfg.ui.reserva.HistorialCitasScreen
 import com.berna8.tfg.ui.reserva.NuevaReservaScreen
 import com.berna8.tfg.ui.taller.ListaTalleresScreen
 import com.berna8.tfg.ui.taller.PerfilTallerScreen
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.berna8.tfg.ui.reserva.HistorialCitasScreen
+import com.google.firebase.auth.FirebaseAuth
 
 object Rutas {
     const val LOGIN = "login"
@@ -27,19 +30,49 @@ object Rutas {
     const val PERFIL_TALLER = "perfil_taller/{uid}"
     const val LISTA_TALLERES = "lista_talleres/{uid}"
     const val CUENTA = "cuenta/{uid}"
-
     const val HISTORIAL_CITAS = "historial_citas/{uid}"
+    const val CARGANDO = "cargando"
 }
 
 @Composable
 fun NavegacionApp() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
+    val auth = FirebaseAuth.getInstance()
+    val usuarioActual = auth.currentUser
+
+    val startDestination = if (usuarioActual != null && usuarioActual.isEmailVerified) {
+        Rutas.CARGANDO
+    } else {
+        Rutas.LOGIN
+    }
 
     NavHost(
         navController = navController,
-        startDestination = Rutas.LOGIN
+        startDestination = startDestination
     ) {
+        composable(Rutas.CARGANDO) {
+            val uid = usuarioActual?.uid ?: ""
+            LaunchedEffect(Unit) {
+                val rol = AuthRepository().obtenerRol(uid)
+                if (rol == "taller") {
+                    navController.navigate("home_taller/$uid") {
+                        popUpTo(Rutas.CARGANDO) { inclusive = true }
+                    }
+                } else {
+                    navController.navigate("home_cliente/$uid") {
+                        popUpTo(Rutas.CARGANDO) { inclusive = true }
+                    }
+                }
+            }
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
         composable(Rutas.LOGIN) {
             LoginScreen(
                 onLoginExitoso = { rol, uid ->
@@ -108,7 +141,7 @@ fun NavegacionApp() {
                 onIrACuenta = {
                     navController.navigate("cuenta/$uid")
                 },
-                        onVerHistorial = {
+                onVerHistorial = {
                     navController.navigate("historial_citas/$uid")
                 }
             )
@@ -125,6 +158,9 @@ fun NavegacionApp() {
                 },
                 onEditarPerfil = {
                     navController.navigate("perfil_taller/$uid")
+                },
+                onIrACuenta = {
+                    navController.navigate("cuenta/$uid")
                 }
             )
         }
@@ -134,6 +170,9 @@ fun NavegacionApp() {
             ListaTalleresScreen(
                 onTallerSeleccionado = { tallerUid ->
                     navController.navigate("nueva_reserva/$uid/$tallerUid")
+                },
+                onVolver = {
+                    navController.popBackStack()
                 }
             )
         }
@@ -169,6 +208,9 @@ fun NavegacionApp() {
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
             CuentaScreen(
                 uid = uid,
+                onVolver = {
+                    navController.popBackStack()
+                },
                 onCerrarSesion = {
                     navController.navigate(Rutas.LOGIN) {
                         popUpTo(0) { inclusive = true }

@@ -34,12 +34,18 @@ fun RegistroScreen(
     var rolSeleccionado by remember { mutableStateOf("cliente") }
 
     LaunchedEffect(estado) {
-        if (estado is AuthEstado.Exito) {
-            onRegistroExitoso(
-                (estado as AuthEstado.Exito).rol,
-                (estado as AuthEstado.Exito).uid
-            )
-            viewModel.resetearEstado()
+        when (estado) {
+            is AuthEstado.EmailNoVerificado -> {
+                onRegistroExitoso("", "")
+            }
+            is AuthEstado.Exito -> {
+                onRegistroExitoso(
+                    (estado as AuthEstado.Exito).rol,
+                    (estado as AuthEstado.Exito).uid
+                )
+                viewModel.resetearEstado()
+            }
+            else -> {}
         }
     }
 

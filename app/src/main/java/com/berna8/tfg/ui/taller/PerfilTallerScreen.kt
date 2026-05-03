@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berna8.tfg.data.model.Taller
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +54,15 @@ fun PerfilTallerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Perfil del taller") }
+                title = { Text("Perfil del taller") },
+                navigationIcon = {
+                    IconButton(onClick = onGuardado) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver"
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->
