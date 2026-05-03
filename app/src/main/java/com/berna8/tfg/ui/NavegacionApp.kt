@@ -19,6 +19,7 @@ import com.berna8.tfg.ui.reserva.NuevaReservaScreen
 import com.berna8.tfg.ui.taller.ListaTalleresScreen
 import com.berna8.tfg.ui.taller.PerfilTallerScreen
 import com.google.firebase.auth.FirebaseAuth
+import com.berna8.tfg.ui.PantallaClientePrincipal
 
 object Rutas {
     const val LOGIN = "login"
@@ -32,6 +33,8 @@ object Rutas {
     const val CUENTA = "cuenta/{uid}"
     const val HISTORIAL_CITAS = "historial_citas/{uid}"
     const val CARGANDO = "cargando"
+
+    const val CLIENTE_PRINCIPAL = "cliente_principal/{uid}"
 }
 
 @Composable
@@ -60,7 +63,7 @@ fun NavegacionApp() {
                         popUpTo(Rutas.CARGANDO) { inclusive = true }
                     }
                 } else {
-                    navController.navigate("home_cliente/$uid") {
+                    navController.navigate("cliente_principal/$uid") {
                         popUpTo(Rutas.CARGANDO) { inclusive = true }
                     }
                 }
@@ -81,7 +84,7 @@ fun NavegacionApp() {
                             popUpTo(Rutas.LOGIN) { inclusive = true }
                         }
                     } else {
-                        navController.navigate("home_cliente/$uid") {
+                        navController.navigate("cliente_principal/$uid") {
                             popUpTo(Rutas.LOGIN) { inclusive = true }
                         }
                     }
@@ -126,23 +129,17 @@ fun NavegacionApp() {
             )
         }
 
-        composable(Rutas.HOME_CLIENTE) { backStackEntry ->
+        composable(Rutas.CLIENTE_PRINCIPAL) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
-            HomeClienteScreen(
+            PantallaClientePrincipal(
                 clienteUid = uid,
                 onCerrarSesion = {
                     navController.navigate(Rutas.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                onNuevaReserva = {
-                    navController.navigate("lista_talleres/$uid")
-                },
-                onIrACuenta = {
-                    navController.navigate("cuenta/$uid")
-                },
-                onVerHistorial = {
-                    navController.navigate("historial_citas/$uid")
+                onTallerSeleccionado = { tallerUid ->
+                    navController.navigate("nueva_reserva/$uid/$tallerUid")
                 }
             )
         }
@@ -168,6 +165,7 @@ fun NavegacionApp() {
         composable(Rutas.LISTA_TALLERES) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
             ListaTalleresScreen(
+                clienteUid = uid,
                 onTallerSeleccionado = { tallerUid ->
                     navController.navigate("nueva_reserva/$uid/$tallerUid")
                 },
@@ -184,8 +182,8 @@ fun NavegacionApp() {
                 clienteUid = uid,
                 tallerUid = tallerUid,
                 onReservaCreada = {
-                    navController.navigate("home_cliente/$uid") {
-                        popUpTo("home_cliente/$uid") { inclusive = true }
+                    navController.navigate("cliente_principal/$uid") {
+                        popUpTo("cliente_principal/$uid") { inclusive = true }
                     }
                 },
                 onVolver = {

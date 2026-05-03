@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,7 +14,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berna8.tfg.data.model.Reserva
 import com.berna8.tfg.ui.home.EstadoChip
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistorialCitasScreen(
     clienteUid: String,
@@ -33,27 +30,18 @@ fun HistorialCitasScreen(
         viewModel.cargarReservasCliente(clienteUid)
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Mis citas") },
-                navigationIcon = {
-                    IconButton(onClick = onVolver) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
-                        )
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
+    Column(modifier = Modifier.fillMaxSize()) {
+        Text(
+            text = "Mis citas",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(16.dp)
+        )
+
         when {
             estado is ReservaEstado.Cargando -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
@@ -61,9 +49,7 @@ fun HistorialCitasScreen(
             }
             reservas.isEmpty() -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
@@ -86,7 +72,6 @@ fun HistorialCitasScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(vertical = 16.dp)
@@ -104,7 +89,6 @@ fun HistorialCitasScreen(
                             TarjetaHistorial(reserva = reserva)
                         }
                     }
-
                     if (citasPasadas.isNotEmpty()) {
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
@@ -148,14 +132,11 @@ fun TarjetaHistorial(reserva: Reserva) {
                 )
                 EstadoChip(estado = reserva.estado)
             }
-
             HorizontalDivider()
-
             Text(
                 text = "📅 ${reserva.fecha} a las ${reserva.hora}",
                 style = MaterialTheme.typography.bodyMedium
             )
-
             if (reserva.marcaCoche.isNotBlank()) {
                 Text(
                     text = "🚗 ${reserva.marcaCoche} ${reserva.modeloCoche} - ${reserva.matriculaCoche}",

@@ -13,12 +13,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berna8.tfg.data.model.Taller
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import com.berna8.tfg.ui.taller.FavoritosViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListaTalleresScreen(
     onTallerSeleccionado: (String) -> Unit,
     onVolver: () -> Unit,
+    clienteUid: String = "",
     viewModel: TallerViewModel = viewModel()
 ) {
     val talleres by viewModel.talleres.collectAsState()
@@ -75,7 +80,8 @@ fun ListaTalleresScreen(
                     items(talleres) { taller ->
                         TarjetaTaller(
                             taller = taller,
-                            onClick = { onTallerSeleccionado(taller.uid) }
+                            onClick = { onTallerSeleccionado(taller.uid) },
+                            clienteUid = clienteUid
                         )
                     }
                 }
@@ -87,8 +93,18 @@ fun ListaTalleresScreen(
 @Composable
 fun TarjetaTaller(
     taller: Taller,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    clienteUid: String = "",
+    viewModel: FavoritosViewModel = viewModel()
 ) {
+    val esFavorito by viewModel.esFavorito.collectAsState()
+
+    LaunchedEffect(taller.uid) {
+        if (clienteUid.isNotBlank()) {
+            viewModel.comprobarFavorito(clienteUid, taller.uid)
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -97,10 +113,35 @@ fun TarjetaTaller(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = taller.nombre,
-                style = MaterialTheme.typography.titleMedium
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = taller.nombre,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                if (clienteUid.isNotBlank()) {
+                    IconButton(
+                        onClick = {
+                            viewModel.toggleFavorito(clienteUid, taller.uid)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (esFavorito)
+                                Icons.Default.Favorite
+                            else
+                                Icons.Default.FavoriteBorder,
+                            contentDescription = "Favorito",
+                            tint = if (esFavorito)
+                                MaterialTheme.colorScheme.error
+                            else
+                                MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = taller.direccion)
             Spacer(modifier = Modifier.height(4.dp))

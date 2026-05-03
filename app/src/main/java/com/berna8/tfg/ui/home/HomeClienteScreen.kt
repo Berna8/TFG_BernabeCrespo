@@ -5,7 +5,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
@@ -18,16 +17,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berna8.tfg.data.model.Reserva
 import com.berna8.tfg.ui.reserva.ReservaEstado
 import com.berna8.tfg.ui.reserva.ReservaViewModel
-import androidx.compose.material.icons.filled.Person
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeClienteScreen(
     clienteUid: String,
-    onCerrarSesion: () -> Unit,
-    onNuevaReserva: () -> Unit,
-    onIrACuenta: () -> Unit,
-    onVerHistorial: () -> Unit,
     viewModel: ReservaViewModel = viewModel()
 ) {
     val reservas by viewModel.reservas.collectAsState()
@@ -37,56 +30,18 @@ fun HomeClienteScreen(
         viewModel.cargarReservasCliente(clienteUid)
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = "AutoCita",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Mis reservas",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onIrACuenta) {
-                        Icon(
-                            Icons.Default.Person,
-                            contentDescription = "Cuenta"
-                        )
-                    }
-                    IconButton(onClick = onVerHistorial) {
-                        Icon(
-                            Icons.Default.DateRange,
-                            contentDescription = "Historial"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onNuevaReserva,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Nueva reserva") }
-            )
-        }
-    ) { paddingValues ->
+    Column(modifier = Modifier.fillMaxSize()) {
+        Text(
+            text = "AutoCita",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(16.dp)
+        )
+
         when {
             estado is ReservaEstado.Cargando -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
@@ -94,9 +49,7 @@ fun HomeClienteScreen(
             }
             reservas.isEmpty() -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
@@ -113,7 +66,7 @@ fun HomeClienteScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Pulsa el botón para hacer tu primera reserva",
+                            text = "Ve a Buscar para encontrar un taller",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
@@ -124,7 +77,6 @@ fun HomeClienteScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(vertical = 16.dp)
