@@ -134,6 +134,9 @@ fun HomeClienteScreen(
                             reserva = reserva,
                             onCancelar = {
                                 viewModel.cancelarReserva(reserva.id, clienteUid, false)
+                            },
+                            onEliminar = {
+                                viewModel.eliminarReserva(reserva.id, clienteUid, false)
                             }
                         )
                     }
@@ -146,7 +149,8 @@ fun HomeClienteScreen(
 @Composable
 fun TarjetaReserva(
     reserva: Reserva,
-    onCancelar: () -> Unit
+    onCancelar: () -> Unit,
+    onEliminar: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -200,17 +204,32 @@ fun TarjetaReserva(
                 )
             }
 
-            if (reserva.estado != "cancelada") {
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedButton(
-                    onClick = onCancelar,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Cancelar reserva")
+            Spacer(modifier = Modifier.height(12.dp))
+
+            when (reserva.estado) {
+                "cancelada" -> {
+                    OutlinedButton(
+                        onClick = onEliminar,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Eliminar")
+                    }
+                }
+                else -> {
+                    OutlinedButton(
+                        onClick = onCancelar,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Cancelar reserva")
+                    }
                 }
             }
         }

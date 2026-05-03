@@ -129,6 +129,9 @@ fun HomeTallerScreen(
                             },
                             onCancelar = {
                                 viewModel.cancelarReserva(reserva.id, tallerUid, true)
+                            },
+                            onEliminar = {
+                                viewModel.eliminarReserva(reserva.id, tallerUid, true)
                             }
                         )
                     }
@@ -142,7 +145,8 @@ fun HomeTallerScreen(
 fun TarjetaReservaTaller(
     reserva: Reserva,
     onConfirmar: () -> Unit,
-    onCancelar: () -> Unit
+    onCancelar: () -> Unit,
+    onEliminar: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -196,28 +200,43 @@ fun TarjetaReservaTaller(
                 )
             }
 
-            if (reserva.estado == "pendiente") {
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            when (reserva.estado) {
+                "cancelada" -> {
                     OutlinedButton(
-                        onClick = onCancelar,
-                        modifier = Modifier.weight(1f),
+                        onClick = onEliminar,
+                        modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = MaterialTheme.colorScheme.error
                         )
                     ) {
-                        Text("Rechazar")
+                        Text("Eliminar")
                     }
-                    Button(
-                        onClick = onConfirmar,
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(8.dp)
+                }
+                "pendiente" -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text("Confirmar")
+                        OutlinedButton(
+                            onClick = onCancelar,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Text("Rechazar")
+                        }
+                        Button(
+                            onClick = onConfirmar,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Confirmar")
+                        }
                     }
                 }
             }

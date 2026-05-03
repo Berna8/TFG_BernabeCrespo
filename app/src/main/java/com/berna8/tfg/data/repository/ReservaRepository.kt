@@ -67,4 +67,13 @@ class ReservaRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun eliminarReserva(reservaId: String): Result<Unit> {
+        return try {
+            coleccion.document(reservaId).delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

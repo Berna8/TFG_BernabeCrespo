@@ -89,4 +89,18 @@ class ReservaViewModel : ViewModel() {
     fun resetearEstado() {
         _estado.value = ReservaEstado.Inactivo
     }
+
+    fun eliminarReserva(reservaId: String, uid: String, esTaller: Boolean) {
+        viewModelScope.launch {
+            val resultado = repositorio.eliminarReserva(reservaId)
+            if (resultado.isSuccess) {
+                if (esTaller) cargarReservasTaller(uid)
+                else cargarReservasCliente(uid)
+            } else {
+                _estado.value = ReservaEstado.Error(
+                    resultado.exceptionOrNull()?.message ?: "Error desconocido"
+                )
+            }
+        }
+    }
 }
