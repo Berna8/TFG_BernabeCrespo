@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter
 fun NuevaReservaScreen(
     clienteUid: String,
     tallerUid: String,
-    onReservaCreada: () -> Unit,
+    onReservaCreada: (String, String, String) -> Unit,
     onVolver: () -> Unit,
     reservaViewModel: ReservaViewModel = viewModel(),
     tallerViewModel: TallerViewModel = viewModel()
@@ -56,7 +56,7 @@ fun NuevaReservaScreen(
 
     LaunchedEffect(estado) {
         if (estado is ReservaEstado.Exito) {
-            onReservaCreada()
+            onReservaCreada(servicio, fechaFormateada, horaFormateada)
             reservaViewModel.resetearEstado()
         }
     }

@@ -20,6 +20,7 @@ import com.berna8.tfg.ui.taller.ListaTalleresScreen
 import com.berna8.tfg.ui.taller.PerfilTallerScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.berna8.tfg.ui.PantallaClientePrincipal
+import com.berna8.tfg.ui.reserva.ConfirmacionReservaScreen
 
 object Rutas {
     const val LOGIN = "login"
@@ -33,8 +34,8 @@ object Rutas {
     const val CUENTA = "cuenta/{uid}"
     const val HISTORIAL_CITAS = "historial_citas/{uid}"
     const val CARGANDO = "cargando"
-
     const val CLIENTE_PRINCIPAL = "cliente_principal/{uid}"
+    const val CONFIRMACION_RESERVA = "confirmacion_reserva/{uid}/{servicio}/{fecha}/{hora}"
 }
 
 @Composable
@@ -181,9 +182,12 @@ fun NavegacionApp() {
             NuevaReservaScreen(
                 clienteUid = uid,
                 tallerUid = tallerUid,
-                onReservaCreada = {
-                    navController.navigate("cliente_principal/$uid") {
-                        popUpTo("cliente_principal/$uid") { inclusive = true }
+                onReservaCreada = { servicio, fecha, hora ->
+                    val servicioEncoded = java.net.URLEncoder.encode(servicio, "UTF-8")
+                    val fechaEncoded = java.net.URLEncoder.encode(fecha, "UTF-8")
+                    val horaEncoded = java.net.URLEncoder.encode(hora, "UTF-8")
+                    navController.navigate("confirmacion_reserva/$uid/$servicioEncoded/$fechaEncoded/$horaEncoded") {
+                        popUpTo("nueva_reserva/$uid/$tallerUid") { inclusive = true }
                     }
                 },
                 onVolver = {
@@ -223,6 +227,23 @@ fun NavegacionApp() {
                 clienteUid = uid,
                 onVolver = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Rutas.CONFIRMACION_RESERVA) { backStackEntry ->
+            val uid = backStackEntry.arguments?.getString("uid") ?: ""
+            val servicio = java.net.URLDecoder.decode(backStackEntry.arguments?.getString("servicio") ?: "", "UTF-8")
+            val fecha = java.net.URLDecoder.decode(backStackEntry.arguments?.getString("fecha") ?: "", "UTF-8")
+            val hora = java.net.URLDecoder.decode(backStackEntry.arguments?.getString("hora") ?: "", "UTF-8")
+            ConfirmacionReservaScreen(
+                servicio = servicio,
+                fecha = fecha,
+                hora = hora,
+                onContinuar = {
+                    navController.navigate("cliente_principal/$uid") {
+                        popUpTo("cliente_principal/$uid") { inclusive = true }
+                    }
                 }
             )
         }
