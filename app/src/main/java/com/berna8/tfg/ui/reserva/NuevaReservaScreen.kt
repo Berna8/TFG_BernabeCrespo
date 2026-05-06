@@ -31,15 +31,15 @@ fun NuevaReservaScreen(
 ) {
     val estado by reservaViewModel.estado.collectAsState()
     val taller by tallerViewModel.taller.collectAsState()
+    val horasOcupadas by reservaViewModel.horasOcupadas.collectAsState()
 
     var servicio by remember { mutableStateOf("") }
     var marcaCoche by remember { mutableStateOf("") }
     var modeloCoche by remember { mutableStateOf("") }
     var matriculaCoche by remember { mutableStateOf("") }
     var servicioExpandido by remember { mutableStateOf(false) }
-
+    var horaExpandida by remember { mutableStateOf(false) }
     var mostrarDatePicker by remember { mutableStateOf(false) }
-    var mostrarTimePicker by remember { mutableStateOf(false) }
 
     var fechaSeleccionada by remember { mutableStateOf<LocalDate?>(null) }
     var horaSeleccionada by remember { mutableStateOf<LocalTime?>(null) }
@@ -48,10 +48,16 @@ fun NuevaReservaScreen(
     val horaFormateada = horaSeleccionada?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
 
     val datePickerState = rememberDatePickerState()
-    val timePickerState = rememberTimePickerState()
 
     LaunchedEffect(tallerUid) {
         tallerViewModel.cargarTaller(tallerUid)
+    }
+
+    LaunchedEffect(fechaFormateada, servicio) {
+        if (fechaFormateada.isNotBlank() && servicio.isNotBlank()) {
+            reservaViewModel.cargarHorasOcupadas(tallerUid, fechaFormateada, servicio)
+            horaSeleccionada = null
+        }
     }
 
     LaunchedEffect(estado) {
@@ -68,6 +74,13 @@ fun NuevaReservaScreen(
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
                         fechaSeleccionada = LocalDate.ofEpochDay(millis / 86400000)
+                        val fechaStr = fechaSeleccionada?.format(
+                            DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                        ) ?: ""
+                        if (servicio.isNotBlank()) {
+                            reservaViewModel.cargarHorasOcupadas(tallerUid, fechaStr, servicio)
+                        }
+                        horaSeleccionada = null
                     }
                     mostrarDatePicker = false
                 }) {
@@ -82,28 +95,6 @@ fun NuevaReservaScreen(
         ) {
             DatePicker(state = datePickerState)
         }
-    }
-
-    if (mostrarTimePicker) {
-        AlertDialog(
-            onDismissRequest = { mostrarTimePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    horaSeleccionada = LocalTime.of(timePickerState.hour, timePickerState.minute)
-                    mostrarTimePicker = false
-                }) {
-                    Text("Aceptar")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { mostrarTimePicker = false }) {
-                    Text("Cancelar")
-                }
-            },
-            text = {
-                TimePicker(state = timePickerState)
-            }
-        )
     }
 
     Scaffold(
@@ -213,19 +204,49 @@ fun NuevaReservaScreen(
                 shape = RoundedCornerShape(12.dp)
             )
 
-            OutlinedTextField(
-                value = horaFormateada,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Hora") },
-                trailingIcon = {
-                    IconButton(onClick = { mostrarTimePicker = true }) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Seleccionar hora")
+            val horasDisponibles = (taller?.horariosDisponibles ?: emptyList())
+                .filter { !horasOcupadas.contains(it) }
+
+            ExposedDropdownMenuBox(
+                expanded = horaExpandida,
+                onExpandedChange = { if (fechaFormateada.isNotBlank()) horaExpandida = it }
+            ) {
+                OutlinedTextField(
+                    value = horaFormateada,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(if (fechaFormateada.isBlank()) "Selecciona primero una fecha" else "Hora") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = horaExpandida)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = fechaFormateada.isNotBlank()
+                )
+                ExposedDropdownMenu(
+                    expanded = horaExpandida,
+                    onDismissRequest = { horaExpandida = false }
+                ) {
+                    if (horasDisponibles.isEmpty()) {
+                        DropdownMenuItem(
+                            text = { Text("No hay horas disponibles") },
+                            onClick = { horaExpandida = false }
+                        )
+                    } else {
+                        horasDisponibles.forEach { hora ->
+                            DropdownMenuItem(
+                                text = { Text(hora) },
+                                onClick = {
+                                    horaSeleccionada = LocalTime.parse(hora)
+                                    horaExpandida = false
+                                }
+                            )
+                        }
                     }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
+                }
+            }
 
             Text(
                 text = "Datos del vehículo",

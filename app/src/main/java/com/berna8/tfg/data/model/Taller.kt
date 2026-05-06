@@ -5,5 +5,6 @@ data class Taller(
     val nombre: String = "",
     val direccion: String = "",
     val telefono: String = "",
-    val servicios: List<String> = emptyList()
+    val servicios: List<String> = emptyList(),
+    val horariosDisponibles: List<String> = emptyList() // ej: ["09:00", "10:00", "11:00"]
 )

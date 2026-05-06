@@ -76,4 +76,21 @@ class ReservaRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun obtenerHorasOcupadas(tallerUid: String, fecha: String, servicio: String): Result<List<String>> {
+        return try {
+            val resultado = coleccion
+                .whereEqualTo("tallerUid", tallerUid)
+                .whereEqualTo("fecha", fecha)
+                .whereEqualTo("servicio", servicio)
+                .whereNotEqualTo("estado", "cancelada")
+                .get(com.google.firebase.firestore.Source.SERVER)
+                .await()
+            val horas = resultado.toObjects(com.berna8.tfg.data.model.Reserva::class.java)
+                .map { it.hora }
+            Result.success(horas)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

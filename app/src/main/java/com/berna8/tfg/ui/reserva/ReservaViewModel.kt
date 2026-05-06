@@ -25,6 +25,9 @@ class ReservaViewModel : ViewModel() {
     private val _reservas = MutableStateFlow<List<Reserva>>(emptyList())
     val reservas: StateFlow<List<Reserva>> = _reservas
 
+    private val _horasOcupadas = MutableStateFlow<List<String>>(emptyList())
+    val horasOcupadas: StateFlow<List<String>> = _horasOcupadas
+
     fun crearReserva(reserva: Reserva) {
         viewModelScope.launch {
             _estado.value = ReservaEstado.Cargando
@@ -103,4 +106,14 @@ class ReservaViewModel : ViewModel() {
             }
         }
     }
+
+    fun cargarHorasOcupadas(tallerUid: String, fecha: String, servicio: String) {
+        viewModelScope.launch {
+            val resultado = repositorio.obtenerHorasOcupadas(tallerUid, fecha, servicio)
+            if (resultado.isSuccess) {
+                _horasOcupadas.value = resultado.getOrDefault(emptyList())
+            }
+        }
+    }
+
 }
