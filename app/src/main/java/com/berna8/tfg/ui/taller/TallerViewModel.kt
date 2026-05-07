@@ -28,6 +28,9 @@ class TallerViewModel : ViewModel() {
     private val _talleres = MutableStateFlow<List<Taller>>(emptyList())
     val talleres: StateFlow<List<Taller>> = _talleres
 
+    private val _imagenes = MutableStateFlow<List<String>>(emptyList())
+    val imagenes: StateFlow<List<String>> = _imagenes
+
     fun cargarTaller(uid: String) {
         viewModelScope.launch {
             _estado.value = TallerEstado.Cargando
@@ -73,5 +76,34 @@ class TallerViewModel : ViewModel() {
 
     fun resetearEstado() {
         _estado.value = TallerEstado.Inactivo
+    }
+
+    fun subirImagen(context: android.content.Context, uri: android.net.Uri, tallerUid: String) {
+        viewModelScope.launch {
+            _estado.value = TallerEstado.Cargando
+            val storageRepo = com.berna8.tfg.data.repository.StorageRepository(context)
+            val resultado = storageRepo.subirImagenTaller(uri)
+            if (resultado.isSuccess) {
+                val url = resultado.getOrNull() ?: return@launch
+                val nuevasImagenes = (_taller.value?.imagenes ?: emptyList()) + url
+                val tallerActualizado = _taller.value?.copy(imagenes = nuevasImagenes) ?: return@launch
+                repositorio.actualizarTaller(tallerActualizado)
+                _taller.value = tallerActualizado
+                _estado.value = TallerEstado.Exito
+            } else {
+                _estado.value = TallerEstado.Error(
+                    resultado.exceptionOrNull()?.message ?: "Error al subir imagen"
+                )
+            }
+        }
+    }
+
+    fun eliminarImagen(url: String, tallerUid: String) {
+        viewModelScope.launch {
+            val nuevasImagenes = (_taller.value?.imagenes ?: emptyList()) - url
+            val tallerActualizado = _taller.value?.copy(imagenes = nuevasImagenes) ?: return@launch
+            repositorio.actualizarTaller(tallerActualizado)
+            _taller.value = tallerActualizado
+        }
     }
 }

@@ -6,5 +6,6 @@ data class Taller(
     val direccion: String = "",
     val telefono: String = "",
     val servicios: List<String> = emptyList(),
-    val horariosDisponibles: List<String> = emptyList() // ej: ["09:00", "10:00", "11:00"]
+    val horariosDisponibles: List<String> = emptyList(),
+    val imagenes: List<String> = emptyList() // URLs de las imágenes
 )

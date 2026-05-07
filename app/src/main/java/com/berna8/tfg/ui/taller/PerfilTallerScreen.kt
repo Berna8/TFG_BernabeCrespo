@@ -1,6 +1,11 @@
 package com.berna8.tfg.ui.taller
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -12,9 +17,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.berna8.tfg.data.model.Taller
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,6 +35,7 @@ fun PerfilTallerScreen(
 ) {
     val estado by viewModel.estado.collectAsState()
     val tallerActual by viewModel.taller.collectAsState()
+    val context = LocalContext.current
 
     var nombre by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
@@ -43,6 +53,12 @@ fun PerfilTallerScreen(
         "18:00", "18:30", "19:00"
     )
 
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.subirImagen(context, it, tallerUid) }
+    }
+
     LaunchedEffect(tallerUid) {
         viewModel.cargarTaller(tallerUid)
     }
@@ -59,7 +75,6 @@ fun PerfilTallerScreen(
 
     LaunchedEffect(estado) {
         if (estado is TallerEstado.Exito) {
-            onGuardado()
             viewModel.resetearEstado()
         }
     }
@@ -87,7 +102,6 @@ fun PerfilTallerScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Datos básicos
             Text(
                 text = "Datos del taller",
                 style = MaterialTheme.typography.titleMedium,
@@ -120,7 +134,6 @@ fun PerfilTallerScreen(
 
             HorizontalDivider()
 
-            // Servicios
             Text(
                 text = "Servicios ofrecidos",
                 style = MaterialTheme.typography.titleMedium,
@@ -170,7 +183,6 @@ fun PerfilTallerScreen(
 
             HorizontalDivider()
 
-            // Horarios
             Text(
                 text = "Horarios disponibles",
                 style = MaterialTheme.typography.titleMedium,
@@ -228,6 +240,58 @@ fun PerfilTallerScreen(
                 }
             }
 
+            HorizontalDivider()
+
+            Text(
+                text = "Imágenes del taller",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            val imagenes = tallerActual?.imagenes ?: emptyList()
+
+            OutlinedButton(
+                onClick = { launcher.launch("image/*") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                enabled = estado !is TallerEstado.Cargando
+            ) {
+                if (estado is TallerEstado.Cargando) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                } else {
+                    Text("Añadir imagen")
+                }
+            }
+
+            if (imagenes.isNotEmpty()) {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(imagenes) { url ->
+                        Box {
+                            AsyncImage(
+                                model = url,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(120.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                            IconButton(
+                                onClick = { viewModel.eliminarImagen(url, tallerUid) },
+                                modifier = Modifier.align(Alignment.TopEnd)
+                            ) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Eliminar",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             if (estado is TallerEstado.Error) {
                 Card(
                     colors = CardDefaults.cardColors(
@@ -252,7 +316,8 @@ fun PerfilTallerScreen(
                             direccion = direccion,
                             telefono = telefono,
                             servicios = servicios,
-                            horariosDisponibles = horarios
+                            horariosDisponibles = horarios,
+                            imagenes = imagenes
                         )
                     )
                 },

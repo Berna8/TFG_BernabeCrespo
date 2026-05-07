@@ -84,4 +84,13 @@ dependencies {
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
+    // Firebase Storage
+    implementation("com.google.firebase:firebase-storage-ktx")
+
+    // Coil (para mostrar imágenes)
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // Cloudinary
+    implementation("com.cloudinary:cloudinary-android:2.3.1")
 }

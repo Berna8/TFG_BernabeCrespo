@@ -4,19 +4,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.berna8.tfg.data.model.Taller
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import com.berna8.tfg.ui.taller.FavoritosViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +48,7 @@ fun ListaTalleresScreen(
                     }
                 }
             )
-        },
+        }
     ) { paddingValues ->
         when {
             estado is TallerEstado.Cargando -> {
@@ -75,7 +77,8 @@ fun ListaTalleresScreen(
                         .fillMaxSize()
                         .padding(paddingValues)
                         .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
                     items(talleres) { taller ->
                         TarjetaTaller(
@@ -108,54 +111,70 @@ fun TarjetaTaller(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = taller.nombre,
-                    style = MaterialTheme.typography.titleMedium
+        Column {
+            if (taller.imagenes.isNotEmpty()) {
+                AsyncImage(
+                    model = taller.imagenes.first(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                    contentScale = ContentScale.Crop
                 )
-                if (clienteUid.isNotBlank()) {
-                    IconButton(
-                        onClick = {
-                            viewModel.toggleFavorito(clienteUid, taller.uid)
+            }
+
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = taller.nombre,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    if (clienteUid.isNotBlank()) {
+                        IconButton(
+                            onClick = {
+                                viewModel.toggleFavorito(clienteUid, taller.uid)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = if (esFavorito)
+                                    Icons.Default.Favorite
+                                else
+                                    Icons.Default.FavoriteBorder,
+                                contentDescription = "Favorito",
+                                tint = if (esFavorito)
+                                    MaterialTheme.colorScheme.error
+                                else
+                                    MaterialTheme.colorScheme.onSurface
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = if (esFavorito)
-                                Icons.Default.Favorite
-                            else
-                                Icons.Default.FavoriteBorder,
-                            contentDescription = "Favorito",
-                            tint = if (esFavorito)
-                                MaterialTheme.colorScheme.error
-                            else
-                                MaterialTheme.colorScheme.onSurface
-                        )
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = taller.direccion)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "📞 ${taller.telefono}",
-                style = MaterialTheme.typography.bodySmall
-            )
-            if (taller.servicios.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = taller.direccion)
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Servicios: ${taller.servicios.joinToString(", ")}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "📞 ${taller.telefono}",
+                    style = MaterialTheme.typography.bodySmall
                 )
+                if (taller.servicios.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Servicios: ${taller.servicios.joinToString(", ")}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
