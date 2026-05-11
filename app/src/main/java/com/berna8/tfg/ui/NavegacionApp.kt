@@ -21,6 +21,7 @@ import com.berna8.tfg.ui.taller.PerfilTallerScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.berna8.tfg.ui.PantallaClientePrincipal
 import com.berna8.tfg.ui.reserva.ConfirmacionReservaScreen
+import com.berna8.tfg.ui.taller.DetalleTallerScreen
 
 object Rutas {
     const val LOGIN = "login"
@@ -36,6 +37,7 @@ object Rutas {
     const val CARGANDO = "cargando"
     const val CLIENTE_PRINCIPAL = "cliente_principal/{uid}"
     const val CONFIRMACION_RESERVA = "confirmacion_reserva/{uid}/{servicio}/{fecha}/{hora}"
+    const val DETALLE_TALLER = "detalle_taller/{uid}/{tallerUid}"
 }
 
 @Composable
@@ -140,7 +142,7 @@ fun NavegacionApp() {
                     }
                 },
                 onTallerSeleccionado = { tallerUid ->
-                    navController.navigate("nueva_reserva/$uid/$tallerUid")
+                    navController.navigate("detalle_taller/$uid/$tallerUid")
                 }
             )
         }
@@ -244,6 +246,29 @@ fun NavegacionApp() {
                     navController.navigate("cliente_principal/$uid") {
                         popUpTo("cliente_principal/$uid") { inclusive = true }
                     }
+                }
+            )
+        }
+
+        composable(Rutas.DETALLE_TALLER) { backStackEntry ->
+            val uid = backStackEntry.arguments?.getString("uid") ?: ""
+            val tallerUid = backStackEntry.arguments?.getString("tallerUid") ?: ""
+            val authViewModel: AuthViewModel = viewModel()
+            val usuario by authViewModel.usuario.collectAsState()
+
+            LaunchedEffect(uid) {
+                authViewModel.cargarUsuario(uid)
+            }
+
+            DetalleTallerScreen(
+                tallerUid = tallerUid,
+                clienteUid = uid,
+                clienteNombre = usuario?.nombre ?: "",
+                onReservar = {
+                    navController.navigate("nueva_reserva/$uid/$tallerUid")
+                },
+                onVolver = {
+                    navController.popBackStack()
                 }
             )
         }
