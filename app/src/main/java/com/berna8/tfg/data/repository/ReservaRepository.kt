@@ -12,7 +12,11 @@ class ReservaRepository {
     suspend fun crearReserva(reserva: Reserva): Result<Unit> {
         return try {
             val docRef = coleccion.document()
-            val reservaConId = reserva.copy(id = docRef.id)
+            val reservaConId = reserva.copy(
+                id = docRef.id,
+                notificacionPendienteTaller = true,
+                mensajeNotificacionTaller = "Nueva cita: ${reserva.servicio} el ${reserva.fecha} a las ${reserva.hora}"
+            )
             docRef.set(reservaConId).await()
             Result.success(Unit)
         } catch (e: Exception) {
@@ -121,6 +125,31 @@ class ReservaRepository {
         return try {
             coleccion.document(reservaId)
                 .update("notificacionPendiente", false)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun obtenerNotificacionesPendientesTaller(tallerUid: String): Result<List<Reserva>> {
+        return try {
+            val resultado = coleccion
+                .whereEqualTo("tallerUid", tallerUid)
+                .whereEqualTo("notificacionPendienteTaller", true)
+                .get(com.google.firebase.firestore.Source.SERVER)
+                .await()
+            val reservas = resultado.toObjects(Reserva::class.java)
+            Result.success(reservas)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun marcarNotificacionTallerLeida(reservaId: String): Result<Unit> {
+        return try {
+            coleccion.document(reservaId)
+                .update("notificacionPendienteTaller", false)
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {

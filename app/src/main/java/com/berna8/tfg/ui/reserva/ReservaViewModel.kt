@@ -136,4 +136,21 @@ class ReservaViewModel : ViewModel() {
             }
         }
     }
+
+    fun comprobarNotificacionesTaller(tallerUid: String, context: android.content.Context) {
+        viewModelScope.launch {
+            val resultado = repositorio.obtenerNotificacionesPendientesTaller(tallerUid)
+            if (resultado.isSuccess) {
+                val reservas = resultado.getOrDefault(emptyList())
+                reservas.forEach { reserva ->
+                    com.berna8.tfg.utils.NotificacionHelper.mostrarNotificacion(
+                        context = context,
+                        titulo = "Nueva cita",
+                        mensaje = reserva.mensajeNotificacionTaller
+                    )
+                    repositorio.marcarNotificacionTallerLeida(reserva.id)
+                }
+            }
+        }
+    }
 }

@@ -12,5 +12,7 @@ data class Reserva(
     val modeloCoche: String = "",
     val matriculaCoche: String = "",
     val notificacionPendiente: Boolean = false,
-    val mensajeNotificacion: String = ""
+    val mensajeNotificacion: String = "",
+    val notificacionPendienteTaller: Boolean = false,
+    val mensajeNotificacionTaller: String = ""
 )

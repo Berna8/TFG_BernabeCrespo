@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -30,9 +31,11 @@ fun HomeTallerScreen(
 ) {
     val reservas by viewModel.reservas.collectAsState()
     val estado by viewModel.estado.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(tallerUid) {
         viewModel.cargarReservasTaller(tallerUid)
+        viewModel.comprobarNotificacionesTaller(tallerUid, context)
     }
 
     Scaffold(
@@ -196,6 +199,15 @@ fun TarjetaReservaTaller(
                 Text(
                     text = "${reserva.fecha} a las ${reserva.hora}",
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (reserva.marcaCoche.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "🚗 ${reserva.marcaCoche} ${reserva.modeloCoche} - ${reserva.matriculaCoche}",
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
