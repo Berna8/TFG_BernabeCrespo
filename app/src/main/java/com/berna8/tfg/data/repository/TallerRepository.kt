@@ -35,6 +35,12 @@ class TallerRepository {
                 .get(com.google.firebase.firestore.Source.SERVER)
                 .await()
             val talleres = resultado.toObjects(Taller::class.java)
+                .filter { taller ->
+                    taller.nombre.isNotBlank() &&
+                            taller.direccion.isNotBlank() &&
+                            taller.telefono.isNotBlank() &&
+                            taller.servicios.isNotEmpty()
+                }
             Result.success(talleres)
         } catch (e: Exception) {
             Result.failure(e)
