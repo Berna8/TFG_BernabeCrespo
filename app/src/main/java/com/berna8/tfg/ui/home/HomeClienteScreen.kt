@@ -17,6 +17,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berna8.tfg.data.model.Reserva
 import com.berna8.tfg.ui.reserva.ReservaEstado
 import com.berna8.tfg.ui.reserva.ReservaViewModel
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun HomeClienteScreen(
@@ -25,9 +26,11 @@ fun HomeClienteScreen(
 ) {
     val reservas by viewModel.reservas.collectAsState()
     val estado by viewModel.estado.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(clienteUid) {
         viewModel.cargarReservasCliente(clienteUid)
+        viewModel.comprobarNotificaciones(clienteUid, context)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {

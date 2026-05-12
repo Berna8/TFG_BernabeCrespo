@@ -93,4 +93,7 @@ dependencies {
 
     // Cloudinary
     implementation("com.cloudinary:cloudinary-android:2.3.1")
+
+    // Notificaciones
+    implementation("androidx.core:core-ktx:1.13.1")
 }

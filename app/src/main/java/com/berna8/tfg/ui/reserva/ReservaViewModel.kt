@@ -68,12 +68,14 @@ class ReservaViewModel : ViewModel() {
 
     fun cancelarReserva(reservaId: String, uid: String, esTaller: Boolean) {
         viewModelScope.launch {
-            val resultado = repositorio.cancelarReserva(reservaId)
+            val resultado = repositorio.cancelarReserva(reservaId, esTaller)
             if (resultado.isSuccess) {
                 if (esTaller) cargarReservasTaller(uid)
                 else cargarReservasCliente(uid)
             } else {
-                _estado.value = ReservaEstado.Error(resultado.exceptionOrNull()?.message ?: "Error desconocido")
+                _estado.value = ReservaEstado.Error(
+                    resultado.exceptionOrNull()?.message ?: "Error desconocido"
+                )
             }
         }
     }
@@ -84,7 +86,9 @@ class ReservaViewModel : ViewModel() {
             if (resultado.isSuccess) {
                 cargarReservasTaller(tallerUid)
             } else {
-                _estado.value = ReservaEstado.Error(resultado.exceptionOrNull()?.message ?: "Error desconocido")
+                _estado.value = ReservaEstado.Error(
+                    resultado.exceptionOrNull()?.message ?: "Error desconocido"
+                )
             }
         }
     }
@@ -116,4 +120,20 @@ class ReservaViewModel : ViewModel() {
         }
     }
 
+    fun comprobarNotificaciones(clienteUid: String, context: android.content.Context) {
+        viewModelScope.launch {
+            val resultado = repositorio.obtenerNotificacionesPendientes(clienteUid)
+            if (resultado.isSuccess) {
+                val reservas = resultado.getOrDefault(emptyList())
+                reservas.forEach { reserva ->
+                    com.berna8.tfg.utils.NotificacionHelper.mostrarNotificacion(
+                        context = context,
+                        titulo = "AutoCita",
+                        mensaje = reserva.mensajeNotificacion
+                    )
+                    repositorio.marcarNotificacionLeida(reserva.id)
+                }
+            }
+        }
+    }
 }

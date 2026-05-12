@@ -46,22 +46,32 @@ class ReservaRepository {
         }
     }
 
-    suspend fun cancelarReserva(reservaId: String): Result<Unit> {
+    suspend fun confirmarReserva(reservaId: String): Result<Unit> {
         return try {
             coleccion.document(reservaId)
-                .update("estado", "cancelada")
-                .await()
+                .update(
+                    mapOf(
+                        "estado" to "confirmada",
+                        "notificacionPendiente" to true,
+                        "mensajeNotificacion" to "Tu cita ha sido confirmada"
+                    )
+                ).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun confirmarReserva(reservaId: String): Result<Unit> {
+    suspend fun cancelarReserva(reservaId: String, esTaller: Boolean): Result<Unit> {
         return try {
             coleccion.document(reservaId)
-                .update("estado", "confirmada")
-                .await()
+                .update(
+                    mapOf(
+                        "estado" to "cancelada",
+                        "notificacionPendiente" to esTaller,
+                        "mensajeNotificacion" to if (esTaller) "Tu cita ha sido cancelada por el taller" else ""
+                    )
+                ).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -86,9 +96,33 @@ class ReservaRepository {
                 .whereNotEqualTo("estado", "cancelada")
                 .get(com.google.firebase.firestore.Source.SERVER)
                 .await()
-            val horas = resultado.toObjects(com.berna8.tfg.data.model.Reserva::class.java)
-                .map { it.hora }
+            val horas = resultado.toObjects(Reserva::class.java).map { it.hora }
             Result.success(horas)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun obtenerNotificacionesPendientes(clienteUid: String): Result<List<Reserva>> {
+        return try {
+            val resultado = coleccion
+                .whereEqualTo("clienteUid", clienteUid)
+                .whereEqualTo("notificacionPendiente", true)
+                .get(com.google.firebase.firestore.Source.SERVER)
+                .await()
+            val reservas = resultado.toObjects(Reserva::class.java)
+            Result.success(reservas)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun marcarNotificacionLeida(reservaId: String): Result<Unit> {
+        return try {
+            coleccion.document(reservaId)
+                .update("notificacionPendiente", false)
+                .await()
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
