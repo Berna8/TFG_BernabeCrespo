@@ -102,4 +102,15 @@ class AuthRepository {
             "cliente"
         }
     }
+
+    suspend fun actualizarFotoPerfil(uid: String, url: String): Result<Unit> {
+        return try {
+            firestore.collection("usuarios").document(uid)
+                .update("fotoPerfil", url)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

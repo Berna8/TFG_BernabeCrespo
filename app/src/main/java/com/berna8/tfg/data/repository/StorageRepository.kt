@@ -52,4 +52,41 @@ class StorageRepository(private val context: Context) {
             }
         }
     }
+
+    suspend fun subirFotoPerfil(uid: String, uri: Uri): Result<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                    ?: return@withContext Result.failure(Exception("No se pudo abrir la imagen"))
+                val bytes = inputStream.readBytes()
+                inputStream.close()
+
+                val requestBody = MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart(
+                        "file",
+                        "perfil.jpg",
+                        bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                    )
+                    .addFormDataPart("upload_preset", uploadPreset)
+                    .addFormDataPart("public_id", "perfiles/$uid")
+                    .build()
+
+                val request = Request.Builder()
+                    .url("https://api.cloudinary.com/v1_1/$cloudName/image/upload")
+                    .post(requestBody)
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
+                    ?: return@withContext Result.failure(Exception("Respuesta vacía"))
+
+                val json = JSONObject(responseBody)
+                val url = json.getString("secure_url")
+                Result.success(url)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
 }

@@ -109,4 +109,16 @@ class AuthViewModel : ViewModel() {
     fun resetearPerfilActualizado() {
         _perfilActualizado.value = false
     }
+
+    fun subirFotoPerfil(context: android.content.Context, uri: android.net.Uri, uid: String) {
+        viewModelScope.launch {
+            val storageRepo = com.berna8.tfg.data.repository.StorageRepository(context)
+            val resultado = storageRepo.subirFotoPerfil(uid, uri)
+            if (resultado.isSuccess) {
+                val url = resultado.getOrNull() ?: return@launch
+                repositorio.actualizarFotoPerfil(uid, url)
+                cargarUsuario(uid)
+            }
+        }
+    }
 }

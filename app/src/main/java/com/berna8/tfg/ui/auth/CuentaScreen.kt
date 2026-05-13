@@ -1,5 +1,9 @@
 package com.berna8.tfg.ui.auth
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,9 +13,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 
 @Composable
 fun CuentaScreen(
@@ -22,10 +29,17 @@ fun CuentaScreen(
 ) {
     val usuario by viewModel.usuario.collectAsState()
     val perfilActualizado by viewModel.perfilActualizado.collectAsState()
+    val context = LocalContext.current
 
     var nombre by remember { mutableStateOf("") }
     var nombreUsuario by remember { mutableStateOf("") }
     var editando by remember { mutableStateOf(false) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.subirFotoPerfil(context, it, uid) }
+    }
 
     LaunchedEffect(uid) {
         viewModel.cargarUsuario(uid)
@@ -62,19 +76,36 @@ fun CuentaScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Surface(
-            modifier = Modifier.size(100.dp),
+            modifier = Modifier
+                .size(100.dp)
+                .clickable { launcher.launch("image/*") },
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primaryContainer
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    Icons.Default.Person,
+            if (usuario?.fotoPerfil?.isNotBlank() == true) {
+                AsyncImage(
+                    model = usuario?.fotoPerfil,
                     contentDescription = null,
-                    modifier = Modifier.size(60.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
+            } else {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(60.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
+
+        Text(
+            text = "Toca para cambiar foto",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        )
 
         usuario?.let {
             Text(
