@@ -156,4 +156,20 @@ class ReservaRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun marcarCocheListo(reservaId: String): Result<Unit> {
+        return try {
+            coleccion.document(reservaId)
+                .update(
+                    mapOf(
+                        "cocheListoParaRecoger" to true,
+                        "notificacionPendiente" to true,
+                        "mensajeNotificacion" to "Tu vehículo está listo para recoger"
+                    )
+                ).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

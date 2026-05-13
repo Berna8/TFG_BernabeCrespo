@@ -14,5 +14,6 @@ data class Reserva(
     val notificacionPendiente: Boolean = false,
     val mensajeNotificacion: String = "",
     val notificacionPendienteTaller: Boolean = false,
-    val mensajeNotificacionTaller: String = ""
+    val mensajeNotificacionTaller: String = "",
+    val cocheListoParaRecoger: Boolean = false
 )

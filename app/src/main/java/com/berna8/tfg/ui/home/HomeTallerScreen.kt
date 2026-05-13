@@ -135,6 +135,9 @@ fun HomeTallerScreen(
                             },
                             onEliminar = {
                                 viewModel.eliminarReserva(reserva.id, tallerUid, true)
+                            },
+                            onCocheListo = {
+                                viewModel.marcarCocheListo(reserva.id, tallerUid)
                             }
                         )
                     }
@@ -149,7 +152,8 @@ fun TarjetaReservaTaller(
     reserva: Reserva,
     onConfirmar: () -> Unit,
     onCancelar: () -> Unit,
-    onEliminar: () -> Unit
+    onEliminar: () -> Unit,
+    onCocheListo: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -249,6 +253,23 @@ fun TarjetaReservaTaller(
                         ) {
                             Text("Confirmar")
                         }
+                    }
+                }
+                "confirmada" -> {
+                    if (!reserva.cocheListoParaRecoger) {
+                        Button(
+                            onClick = onCocheListo,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("🔔 Notificar coche listo")
+                        }
+                    } else {
+                        Text(
+                            text = "✅ Cliente notificado",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             }

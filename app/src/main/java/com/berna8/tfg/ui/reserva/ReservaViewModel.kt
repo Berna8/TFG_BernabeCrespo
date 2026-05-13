@@ -153,4 +153,17 @@ class ReservaViewModel : ViewModel() {
             }
         }
     }
+
+    fun marcarCocheListo(reservaId: String, tallerUid: String) {
+        viewModelScope.launch {
+            val resultado = repositorio.marcarCocheListo(reservaId)
+            if (resultado.isSuccess) {
+                cargarReservasTaller(tallerUid)
+            } else {
+                _estado.value = ReservaEstado.Error(
+                    resultado.exceptionOrNull()?.message ?: "Error desconocido"
+                )
+            }
+        }
+    }
 }
