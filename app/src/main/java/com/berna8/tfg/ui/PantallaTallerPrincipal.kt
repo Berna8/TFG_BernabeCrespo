@@ -9,27 +9,26 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.berna8.tfg.ui.auth.CuentaScreen
-import com.berna8.tfg.ui.reserva.HistorialCitasScreen
-import com.berna8.tfg.ui.taller.BuscarTalleresScreen
-import com.berna8.tfg.ui.taller.FavoritosScreen
+import com.berna8.tfg.ui.home.HomeTallerScreen
+import com.berna8.tfg.ui.home.HistorialTallerScreen
+import com.berna8.tfg.ui.taller.PerfilTallerScreen
 
 @Composable
-fun PantallaClientePrincipal(
-    clienteUid: String,
-    onCerrarSesion: () -> Unit,
-    onTallerSeleccionado: (String) -> Unit
+fun PantallaTallerPrincipal(
+    tallerUid: String,
+    onCerrarSesion: () -> Unit
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val rutaActual = backStackEntry?.destination?.route ?: ItemNavegacion.Buscar.ruta
+    val rutaActual = backStackEntry?.destination?.route ?: ItemNavegacionTaller.Citas.ruta
 
     Scaffold(
         bottomBar = {
-            BarraNavegacionCliente(
+            BarraNavegacionTaller(
                 rutaActual = rutaActual,
                 onItemSeleccionado = { ruta ->
                     navController.navigate(ruta) {
-                        popUpTo(ItemNavegacion.Buscar.ruta) {
+                        popUpTo(ItemNavegacionTaller.Citas.ruta) {
                             saveState = true
                         }
                         launchSingleTop = true
@@ -41,39 +40,40 @@ fun PantallaClientePrincipal(
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = ItemNavegacion.Buscar.ruta,
+            startDestination = ItemNavegacionTaller.Citas.ruta,
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable(ItemNavegacion.Buscar.ruta) {
-                BuscarTalleresScreen(
-                    clienteUid = clienteUid,
-                    onTallerSeleccionado = { tallerUid ->
-                        onTallerSeleccionado(tallerUid)
+            composable(ItemNavegacionTaller.Citas.ruta) {
+                HomeTallerScreen(
+                    tallerUid = tallerUid,
+                    onCerrarSesion = onCerrarSesion,
+                    onEditarPerfil = {
+                        navController.navigate(ItemNavegacionTaller.MiTaller.ruta)
+                    },
+                    onIrACuenta = {
+                        navController.navigate(ItemNavegacionTaller.Cuenta.ruta)
                     }
                 )
             }
 
-            composable(ItemNavegacion.Favoritos.ruta) {
-                FavoritosScreen(
-                    clienteUid = clienteUid,
-                    onTallerSeleccionado = { tallerUid ->
-                        onTallerSeleccionado(tallerUid)
-                    }
+            composable(ItemNavegacionTaller.Historial.ruta) {
+                HistorialTallerScreen(
+                    tallerUid = tallerUid
                 )
             }
 
-            composable(ItemNavegacion.Citas.ruta) {
-                HistorialCitasScreen(
-                    clienteUid = clienteUid,
-                    onVolver = {
+            composable(ItemNavegacionTaller.MiTaller.ruta) {
+                PerfilTallerScreen(
+                    tallerUid = tallerUid,
+                    onGuardado = {
                         navController.popBackStack()
                     }
                 )
             }
 
-            composable(ItemNavegacion.Cuenta.ruta) {
+            composable(ItemNavegacionTaller.Cuenta.ruta) {
                 CuentaScreen(
-                    uid = clienteUid,
+                    uid = tallerUid,
                     onCerrarSesion = onCerrarSesion,
                     onVolver = {
                         navController.popBackStack()

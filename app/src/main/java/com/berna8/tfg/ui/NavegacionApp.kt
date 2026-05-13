@@ -22,6 +22,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.berna8.tfg.ui.PantallaClientePrincipal
 import com.berna8.tfg.ui.reserva.ConfirmacionReservaScreen
 import com.berna8.tfg.ui.taller.DetalleTallerScreen
+import com.berna8.tfg.ui.PantallaTallerPrincipal
 
 object Rutas {
     const val LOGIN = "login"
@@ -38,6 +39,7 @@ object Rutas {
     const val CLIENTE_PRINCIPAL = "cliente_principal/{uid}"
     const val CONFIRMACION_RESERVA = "confirmacion_reserva/{uid}/{servicio}/{fecha}/{hora}"
     const val DETALLE_TALLER = "detalle_taller/{uid}/{tallerUid}"
+    const val TALLER_PRINCIPAL = "taller_principal/{uid}"
 }
 
 @Composable
@@ -62,7 +64,7 @@ fun NavegacionApp() {
             LaunchedEffect(Unit) {
                 val rol = AuthRepository().obtenerRol(uid)
                 if (rol == "taller") {
-                    navController.navigate("home_taller/$uid") {
+                    navController.navigate("taller_principal/$uid") {
                         popUpTo(Rutas.CARGANDO) { inclusive = true }
                     }
                 } else {
@@ -83,7 +85,7 @@ fun NavegacionApp() {
             LoginScreen(
                 onLoginExitoso = { rol, uid ->
                     if (rol == "taller") {
-                        navController.navigate("home_taller/$uid") {
+                        navController.navigate("taller_principal/$uid") {
                             popUpTo(Rutas.LOGIN) { inclusive = true }
                         }
                     } else {
@@ -147,20 +149,14 @@ fun NavegacionApp() {
             )
         }
 
-        composable(Rutas.HOME_TALLER) { backStackEntry ->
+        composable(Rutas.TALLER_PRINCIPAL) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
-            HomeTallerScreen(
+            PantallaTallerPrincipal(
                 tallerUid = uid,
                 onCerrarSesion = {
                     navController.navigate(Rutas.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
-                },
-                onEditarPerfil = {
-                    navController.navigate("perfil_taller/$uid")
-                },
-                onIrACuenta = {
-                    navController.navigate("cuenta/$uid")
                 }
             )
         }
