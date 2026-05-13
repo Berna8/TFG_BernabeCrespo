@@ -34,8 +34,17 @@ class AuthRepository {
         }
     }
 
-    suspend fun login(email: String, password: String): Result<String> {
+    suspend fun login(emailOUsuario: String, password: String): Result<String> {
         return try {
+            val email = if (emailOUsuario.contains("@")) {
+                emailOUsuario
+            } else {
+                val resultado = obtenerEmailPorNombreUsuario(emailOUsuario)
+                if (resultado.isFailure) return Result.failure(
+                    resultado.exceptionOrNull() ?: Exception("Usuario no encontrado")
+                )
+                resultado.getOrNull() ?: return Result.failure(Exception("Email no encontrado"))
+            }
             auth.signInWithEmailAndPassword(email, password).await()
             val uid = auth.currentUser?.uid ?: return Result.failure(Exception("Error al obtener UID"))
             val doc = firestore.collection("usuarios").document(uid).get().await()
@@ -109,6 +118,23 @@ class AuthRepository {
                 .update("fotoPerfil", url)
                 .await()
             Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun obtenerEmailPorNombreUsuario(nombreUsuario: String): Result<String> {
+        return try {
+            val resultado = firestore.collection("usuarios")
+                .whereEqualTo("nombreUsuario", nombreUsuario)
+                .get()
+                .await()
+            if (resultado.isEmpty) {
+                Result.failure(Exception("Usuario no encontrado"))
+            } else {
+                val email = resultado.documents.first().getString("email") ?: ""
+                Result.success(email)
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
