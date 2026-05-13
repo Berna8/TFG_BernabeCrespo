@@ -174,6 +174,18 @@ fun TarjetaReserva(
                         Text("Eliminar")
                     }
                 }
+                "confirmada" -> {
+                    OutlinedButton(
+                        onClick = onCancelar,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Cancelar reserva")
+                    }
+                }
                 else -> {
                     OutlinedButton(
                         onClick = onCancelar,
@@ -195,6 +207,7 @@ fun TarjetaReserva(
 fun EstadoChip(estado: String) {
     val (color, emoji) = when (estado) {
         "confirmada" -> Pair(MaterialTheme.colorScheme.primary, "✅")
+        "completada" -> Pair(MaterialTheme.colorScheme.primary, "🏁")
         "cancelada" -> Pair(MaterialTheme.colorScheme.error, "❌")
         else -> Pair(MaterialTheme.colorScheme.secondary, "⏳")
     }

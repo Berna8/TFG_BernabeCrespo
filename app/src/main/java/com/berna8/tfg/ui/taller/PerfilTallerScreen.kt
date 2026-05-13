@@ -10,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -79,264 +78,253 @@ fun PerfilTallerScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Perfil del taller") },
-                navigationIcon = {
-                    IconButton(onClick = onGuardado) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
-                        )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Mi taller",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = "Datos del taller",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        OutlinedTextField(
+            value = nombre,
+            onValueChange = { nombre = it },
+            label = { Text("Nombre del taller") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        OutlinedTextField(
+            value = direccion,
+            onValueChange = { direccion = it },
+            label = { Text("Dirección") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        OutlinedTextField(
+            value = telefono,
+            onValueChange = { telefono = it },
+            label = { Text("Teléfono") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        HorizontalDivider()
+
+        Text(
+            text = "Servicios ofrecidos",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = nuevoServicio,
+                onValueChange = { nuevoServicio = it },
+                label = { Text("Nuevo servicio") },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(12.dp)
+            )
+            IconButton(
+                onClick = {
+                    if (nuevoServicio.isNotBlank()) {
+                        servicios = servicios + nuevoServicio
+                        nuevoServicio = ""
                     }
                 }
-            )
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Añadir servicio")
+            }
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(
-                text = "Datos del taller",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
 
-            OutlinedTextField(
-                value = nombre,
-                onValueChange = { nombre = it },
-                label = { Text("Nombre del taller") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            OutlinedTextField(
-                value = direccion,
-                onValueChange = { direccion = it },
-                label = { Text("Dirección") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            OutlinedTextField(
-                value = telefono,
-                onValueChange = { telefono = it },
-                label = { Text("Teléfono") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            HorizontalDivider()
-
-            Text(
-                text = "Servicios ofrecidos",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
+        servicios.forEach { servicio ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
-                    value = nuevoServicio,
-                    onValueChange = { nuevoServicio = it },
-                    label = { Text("Nuevo servicio") },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                IconButton(
-                    onClick = {
-                        if (nuevoServicio.isNotBlank()) {
-                            servicios = servicios + nuevoServicio
-                            nuevoServicio = ""
-                        }
-                    }
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Añadir servicio")
-                }
-            }
-
-            servicios.forEach { servicio ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "• $servicio")
-                    IconButton(onClick = { servicios = servicios - servicio }) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "Eliminar",
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-            }
-
-            HorizontalDivider()
-
-            Text(
-                text = "Horarios disponibles",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            ExposedDropdownMenuBox(
-                expanded = horarioExpandido,
-                onExpandedChange = { horarioExpandido = it }
-            ) {
-                OutlinedTextField(
-                    value = nuevoHorario,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Añadir horario") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = horarioExpandido)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                ExposedDropdownMenu(
-                    expanded = horarioExpandido,
-                    onDismissRequest = { horarioExpandido = false }
-                ) {
-                    horariosPredefinidos.filter { !horarios.contains(it) }.forEach { horario ->
-                        DropdownMenuItem(
-                            text = { Text(horario) },
-                            onClick = {
-                                horarios = (horarios + horario).sorted()
-                                nuevoHorario = horario
-                                horarioExpandido = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            horarios.forEach { horario ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "🕐 $horario")
-                    IconButton(onClick = { horarios = horarios - horario }) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "Eliminar",
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-            }
-
-            HorizontalDivider()
-
-            Text(
-                text = "Imágenes del taller",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            val imagenes = tallerActual?.imagenes ?: emptyList()
-
-            OutlinedButton(
-                onClick = { launcher.launch("image/*") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                enabled = estado !is TallerEstado.Cargando
-            ) {
-                if (estado is TallerEstado.Cargando) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
-                } else {
-                    Text("Añadir imagen")
-                }
-            }
-
-            if (imagenes.isNotEmpty()) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(imagenes) { url ->
-                        Box {
-                            AsyncImage(
-                                model = url,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(120.dp)
-                                    .clip(RoundedCornerShape(8.dp)),
-                                contentScale = ContentScale.Crop
-                            )
-                            IconButton(
-                                onClick = { viewModel.eliminarImagen(url, tallerUid) },
-                                modifier = Modifier.align(Alignment.TopEnd)
-                            ) {
-                                Icon(
-                                    Icons.Default.Delete,
-                                    contentDescription = "Eliminar",
-                                    tint = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (estado is TallerEstado.Error) {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = (estado as TallerEstado.Error).mensaje,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(12.dp)
+                Text(text = "• $servicio")
+                IconButton(onClick = { servicios = servicios - servicio }) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Eliminar",
+                        tint = MaterialTheme.colorScheme.error
                     )
                 }
             }
+        }
 
-            Button(
-                onClick = {
-                    viewModel.guardarTaller(
-                        Taller(
-                            uid = tallerUid,
-                            nombre = nombre,
-                            direccion = direccion,
-                            telefono = telefono,
-                            servicios = servicios,
-                            horariosDisponibles = horarios,
-                            imagenes = imagenes
-                        )
-                    )
+        HorizontalDivider()
+
+        Text(
+            text = "Horarios disponibles",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        ExposedDropdownMenuBox(
+            expanded = horarioExpandido,
+            onExpandedChange = { horarioExpandido = it }
+        ) {
+            OutlinedTextField(
+                value = nuevoHorario,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Añadir horario") },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = horarioExpandido)
                 },
-                enabled = estado !is TallerEstado.Cargando &&
-                        nombre.isNotBlank() &&
-                        direccion.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable),
                 shape = RoundedCornerShape(12.dp)
+            )
+            ExposedDropdownMenu(
+                expanded = horarioExpandido,
+                onDismissRequest = { horarioExpandido = false }
             ) {
-                if (estado is TallerEstado.Cargando) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+                horariosPredefinidos.filter { !horarios.contains(it) }.forEach { horario ->
+                    DropdownMenuItem(
+                        text = { Text(horario) },
+                        onClick = {
+                            horarios = (horarios + horario).sorted()
+                            nuevoHorario = horario
+                            horarioExpandido = false
+                        }
                     )
-                } else {
-                    Text("Guardar")
                 }
+            }
+        }
+
+        horarios.forEach { horario ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "🕐 $horario")
+                IconButton(onClick = { horarios = horarios - horario }) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Eliminar",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+
+        HorizontalDivider()
+
+        Text(
+            text = "Imágenes del taller",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        val imagenes = tallerActual?.imagenes ?: emptyList()
+
+        OutlinedButton(
+            onClick = { launcher.launch("image/*") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            enabled = estado !is TallerEstado.Cargando
+        ) {
+            if (estado is TallerEstado.Cargando) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+            } else {
+                Text("Añadir imagen")
+            }
+        }
+
+        if (imagenes.isNotEmpty()) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(imagenes) { url ->
+                    Box {
+                        AsyncImage(
+                            model = url,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                        IconButton(
+                            onClick = { viewModel.eliminarImagen(url, tallerUid) },
+                            modifier = Modifier.align(Alignment.TopEnd)
+                        ) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Eliminar",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        if (estado is TallerEstado.Error) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = (estado as TallerEstado.Error).mensaje,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+        }
+
+        Button(
+            onClick = {
+                viewModel.guardarTaller(
+                    Taller(
+                        uid = tallerUid,
+                        nombre = nombre,
+                        direccion = direccion,
+                        telefono = telefono,
+                        servicios = servicios,
+                        horariosDisponibles = horarios,
+                        imagenes = imagenes
+                    )
+                )
+            },
+            enabled = estado !is TallerEstado.Cargando &&
+                    nombre.isNotBlank() &&
+                    direccion.isNotBlank(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            if (estado is TallerEstado.Cargando) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text("Guardar")
             }
         }
     }

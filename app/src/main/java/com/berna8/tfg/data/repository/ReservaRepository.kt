@@ -163,6 +163,7 @@ class ReservaRepository {
                 .update(
                     mapOf(
                         "cocheListoParaRecoger" to true,
+                        "estado" to "completada",
                         "notificacionPendiente" to true,
                         "mensajeNotificacion" to "Tu vehículo está listo para recoger"
                     )

@@ -47,7 +47,13 @@ fun NuevaReservaScreen(
     val fechaFormateada = fechaSeleccionada?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: ""
     val horaFormateada = horaSeleccionada?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
 
-    val datePickerState = rememberDatePickerState()
+    val datePickerState = rememberDatePickerState(
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis >= System.currentTimeMillis() - 86400000
+            }
+        }
+    )
 
     LaunchedEffect(tallerUid) {
         tallerViewModel.cargarTaller(tallerUid)
@@ -204,8 +210,13 @@ fun NuevaReservaScreen(
                 shape = RoundedCornerShape(12.dp)
             )
 
+            val ahora = LocalTime.now()
             val horasDisponibles = (taller?.horariosDisponibles ?: emptyList())
-                .filter { !horasOcupadas.contains(it) }
+                .filter { hora ->
+                    !horasOcupadas.contains(hora) &&
+                            (fechaSeleccionada?.isAfter(LocalDate.now()) == true ||
+                                    LocalTime.parse(hora).isAfter(ahora))
+                }
 
             ExposedDropdownMenuBox(
                 expanded = horaExpandida,

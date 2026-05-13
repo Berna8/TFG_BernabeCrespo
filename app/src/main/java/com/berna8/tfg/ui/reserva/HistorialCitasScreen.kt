@@ -23,8 +23,8 @@ fun HistorialCitasScreen(
     val reservas by viewModel.reservas.collectAsState()
     val estado by viewModel.estado.collectAsState()
 
-    val citasPasadas = reservas.filter { it.estado == "cancelada" }
-    val citasFuturas = reservas.filter { it.estado != "cancelada" }
+    val citasPasadas = reservas.filter { it.estado == "cancelada" || it.estado == "completada" }
+    val citasFuturas = reservas.filter { it.estado == "pendiente" || it.estado == "confirmada" }
 
     LaunchedEffect(clienteUid) {
         viewModel.cargarReservasCliente(clienteUid)
@@ -86,7 +86,12 @@ fun HistorialCitasScreen(
                             )
                         }
                         items(citasFuturas) { reserva ->
-                            TarjetaHistorial(reserva = reserva)
+                            TarjetaHistorial(
+                                reserva = reserva,
+                                onCancelar = {
+                                    viewModel.cancelarReserva(reserva.id, clienteUid, false)
+                                }
+                            )
                         }
                     }
                     if (citasPasadas.isNotEmpty()) {
@@ -100,7 +105,12 @@ fun HistorialCitasScreen(
                             )
                         }
                         items(citasPasadas) { reserva ->
-                            TarjetaHistorial(reserva = reserva)
+                            TarjetaHistorial(
+                                reserva = reserva,
+                                onEliminar = {
+                                    viewModel.eliminarReserva(reserva.id, clienteUid, false)
+                                }
+                            )
                         }
                     }
                 }
@@ -110,7 +120,11 @@ fun HistorialCitasScreen(
 }
 
 @Composable
-fun TarjetaHistorial(reserva: Reserva) {
+fun TarjetaHistorial(
+    reserva: Reserva,
+    onCancelar: (() -> Unit)? = null,
+    onEliminar: (() -> Unit)? = null
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -143,6 +157,32 @@ fun TarjetaHistorial(reserva: Reserva) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
+            }
+
+            if (onCancelar != null) {
+                OutlinedButton(
+                    onClick = onCancelar,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Cancelar cita")
+                }
+            }
+
+            if (onEliminar != null) {
+                OutlinedButton(
+                    onClick = onEliminar,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Eliminar")
+                }
             }
         }
     }

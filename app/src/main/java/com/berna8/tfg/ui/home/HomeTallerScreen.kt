@@ -7,7 +7,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,7 +19,6 @@ import com.berna8.tfg.data.model.Reserva
 import com.berna8.tfg.ui.reserva.ReservaEstado
 import com.berna8.tfg.ui.reserva.ReservaViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTallerScreen(
     tallerUid: String,
@@ -30,6 +28,7 @@ fun HomeTallerScreen(
     viewModel: ReservaViewModel = viewModel()
 ) {
     val reservas by viewModel.reservas.collectAsState()
+    val reservasPendientes = reservas.filter { it.estado == "pendiente" }
     val estado by viewModel.estado.collectAsState()
     val context = LocalContext.current
 
@@ -38,60 +37,26 @@ fun HomeTallerScreen(
         viewModel.comprobarNotificacionesTaller(tallerUid, context)
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = "AutoCita",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Panel del taller",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onEditarPerfil) {
-                        Icon(
-                            Icons.Default.Build,
-                            contentDescription = "Editar perfil",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    IconButton(onClick = onIrACuenta) {
-                        Icon(
-                            Icons.Default.Person,
-                            contentDescription = "Cuenta"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
-        }
-    ) { paddingValues ->
+    Column(modifier = Modifier.fillMaxSize()) {
+        Text(
+            text = "Citas pendientes",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(16.dp)
+        )
+
         when {
             estado is ReservaEstado.Cargando -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
                 }
             }
-            reservas.isEmpty() -> {
+            reservasPendientes.isEmpty() -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
@@ -103,7 +68,7 @@ fun HomeTallerScreen(
                             style = MaterialTheme.typography.headlineLarge
                         )
                         Text(
-                            text = "No hay citas programadas",
+                            text = "No hay citas pendientes",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -119,12 +84,11 @@ fun HomeTallerScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(vertical = 16.dp)
                 ) {
-                    items(reservas) { reserva ->
+                    items(reservasPendientes) { reserva ->
                         TarjetaReservaTaller(
                             reserva = reserva,
                             onConfirmar = {
