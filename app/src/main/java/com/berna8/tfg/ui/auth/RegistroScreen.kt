@@ -19,6 +19,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import com.berna8.tfg.R
 
 @Composable
 fun RegistroScreen(
@@ -66,12 +68,12 @@ fun RegistroScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "AutoCita",
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
+                    AsyncImage(
+                        model = R.drawable.logo_autocita,
+                        contentDescription = "AutoCita",
+                        modifier = Modifier.size(100.dp)
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Crea tu cuenta",
                         style = MaterialTheme.typography.bodyMedium,

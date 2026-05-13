@@ -8,8 +8,10 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -54,7 +56,14 @@ fun BarraNavegacionCliente(
                 icon = { Icon(item.icono, contentDescription = item.titulo) },
                 label = { Text(item.titulo) },
                 selected = rutaActual == item.ruta,
-                onClick = { onItemSeleccionado(item.ruta) }
+                onClick = { onItemSeleccionado(item.ruta) },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = MaterialTheme.colorScheme.primary,
+                    selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
         }
     }
@@ -78,7 +87,14 @@ fun BarraNavegacionTaller(
                 icon = { Icon(item.icono, contentDescription = item.titulo) },
                 label = { Text(item.titulo) },
                 selected = rutaActual == item.ruta,
-                onClick = { onItemSeleccionado(item.ruta) }
+                onClick = { onItemSeleccionado(item.ruta) },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = MaterialTheme.colorScheme.primary,
+                    selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
         }
     }

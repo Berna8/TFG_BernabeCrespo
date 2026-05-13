@@ -1,28 +1,26 @@
 package com.berna8.tfg.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import com.berna8.tfg.R
 import com.berna8.tfg.data.repository.AuthRepository
 import com.berna8.tfg.ui.auth.*
-import com.berna8.tfg.ui.home.HomeClienteScreen
-import com.berna8.tfg.ui.home.HomeTallerScreen
+import com.berna8.tfg.ui.reserva.ConfirmacionReservaScreen
 import com.berna8.tfg.ui.reserva.HistorialCitasScreen
 import com.berna8.tfg.ui.reserva.NuevaReservaScreen
+import com.berna8.tfg.ui.taller.DetalleTallerScreen
 import com.berna8.tfg.ui.taller.ListaTalleresScreen
 import com.berna8.tfg.ui.taller.PerfilTallerScreen
 import com.google.firebase.auth.FirebaseAuth
-import com.berna8.tfg.ui.PantallaClientePrincipal
-import com.berna8.tfg.ui.reserva.ConfirmacionReservaScreen
-import com.berna8.tfg.ui.taller.DetalleTallerScreen
-import com.berna8.tfg.ui.PantallaTallerPrincipal
 
 object Rutas {
     const val LOGIN = "login"
@@ -77,7 +75,17 @@ fun NavegacionApp() {
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    AsyncImage(
+                        model = R.drawable.logo_autocita,
+                        contentDescription = "AutoCita",
+                        modifier = Modifier.size(200.dp)
+                    )
+                    CircularProgressIndicator()
+                }
             }
         }
 
