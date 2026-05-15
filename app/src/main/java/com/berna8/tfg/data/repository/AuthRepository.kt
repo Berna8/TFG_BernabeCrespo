@@ -55,9 +55,17 @@ class AuthRepository {
         }
     }
 
-    suspend fun obtenerUsuario(uid: String): Result<Usuario> {
+    suspend fun obtenerUsuario(uid: String, forceServer: Boolean = false): Result<Usuario> {
         return try {
-            val doc = firestore.collection("usuarios").document(uid).get().await()
+            val doc = if (forceServer) {
+                firestore.collection("usuarios").document(uid)
+                    .get(com.google.firebase.firestore.Source.SERVER)
+                    .await()
+            } else {
+                firestore.collection("usuarios").document(uid)
+                    .get()
+                    .await()
+            }
             val usuario = doc.toObject(Usuario::class.java)
                 ?: return Result.failure(Exception("Usuario no encontrado"))
             Result.success(usuario)

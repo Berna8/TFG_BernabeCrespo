@@ -61,6 +61,9 @@ class StorageRepository(private val context: Context) {
                 val bytes = inputStream.readBytes()
                 inputStream.close()
 
+                val timestamp = System.currentTimeMillis()
+                val publicId = "perfiles/${uid}_$timestamp"
+
                 val requestBody = MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
                     .addFormDataPart(
@@ -69,7 +72,7 @@ class StorageRepository(private val context: Context) {
                         bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
                     )
                     .addFormDataPart("upload_preset", uploadPreset)
-                    .addFormDataPart("public_id", "perfiles/$uid")
+                    .addFormDataPart("public_id", publicId)
                     .build()
 
                 val request = Request.Builder()

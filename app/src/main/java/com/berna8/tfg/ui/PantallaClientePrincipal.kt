@@ -4,12 +4,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.berna8.tfg.ui.auth.CuentaScreen
 import com.berna8.tfg.ui.reserva.HistorialCitasScreen
+import com.berna8.tfg.ui.reserva.ReservaViewModel
 import com.berna8.tfg.ui.taller.BuscarTalleresScreen
 import com.berna8.tfg.ui.taller.FavoritosScreen
 
@@ -22,6 +25,12 @@ fun PantallaClientePrincipal(
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val rutaActual = backStackEntry?.destination?.route ?: ItemNavegacion.Buscar.ruta
+    val context = LocalContext.current
+    val reservaViewModel: ReservaViewModel = viewModel()
+
+    LaunchedEffect(clienteUid) {
+        reservaViewModel.comprobarNotificaciones(clienteUid, context)
+    }
 
     Scaffold(
         bottomBar = {

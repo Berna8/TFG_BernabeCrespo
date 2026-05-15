@@ -19,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import coil.request.CachePolicy
 
 @Composable
 fun CuentaScreen(
@@ -84,7 +86,11 @@ fun CuentaScreen(
         ) {
             if (usuario?.fotoPerfil?.isNotBlank() == true) {
                 AsyncImage(
-                    model = usuario?.fotoPerfil,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(usuario?.fotoPerfil)
+                        .diskCachePolicy(CachePolicy.DISABLED)
+                        .memoryCachePolicy(CachePolicy.DISABLED)
+                        .build(),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop

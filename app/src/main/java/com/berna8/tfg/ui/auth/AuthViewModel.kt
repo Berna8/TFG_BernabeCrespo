@@ -84,7 +84,7 @@ class AuthViewModel : ViewModel() {
 
     fun cargarUsuario(uid: String) {
         viewModelScope.launch {
-            val resultado = repositorio.obtenerUsuario(uid)
+            val resultado = repositorio.obtenerUsuario(uid, forceServer = true)
             if (resultado.isSuccess) {
                 _usuario.value = resultado.getOrNull()
             }
@@ -116,8 +116,11 @@ class AuthViewModel : ViewModel() {
             val resultado = storageRepo.subirFotoPerfil(uid, uri)
             if (resultado.isSuccess) {
                 val url = resultado.getOrNull() ?: return@launch
-                repositorio.actualizarFotoPerfil(uid, url)
+                val urlConTimestamp = "$url?t=${System.currentTimeMillis()}"
+                repositorio.actualizarFotoPerfil(uid, urlConTimestamp)
                 cargarUsuario(uid)
+            } else {
+                android.util.Log.e("FotoPerfil", "Error: ${resultado.exceptionOrNull()?.message}")
             }
         }
     }
