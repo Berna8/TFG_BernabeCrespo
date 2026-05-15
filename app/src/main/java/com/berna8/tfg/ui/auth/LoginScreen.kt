@@ -19,6 +19,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.berna8.tfg.R
 
+/**
+ * Pantalla de inicio de sesión.
+ * Permite acceder con email o nombre de usuario y contraseña.
+ */
 @Composable
 fun LoginScreen(
     onLoginExitoso: (String, String) -> Unit,
@@ -31,6 +35,7 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    // Navega según el resultado del login
     LaunchedEffect(estado) {
         when (estado) {
             is AuthEstado.Exito -> {
@@ -57,7 +62,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Bottom
         ) {
-            // Cabecera
+            // Cabecera con logo y eslogan
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -79,7 +84,7 @@ fun LoginScreen(
                 }
             }
 
-            // Tarjeta de login
+            // Tarjeta de formulario de login
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
@@ -103,9 +108,7 @@ fun LoginScreen(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Correo o nombre de usuario") },
-                        leadingIcon = {
-                            Icon(Icons.Default.Email, contentDescription = null)
-                        },
+                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
@@ -115,9 +118,7 @@ fun LoginScreen(
                         value = password,
                         onValueChange = { password = it },
                         label = { Text("Contraseña") },
-                        leadingIcon = {
-                            Icon(Icons.Default.Lock, contentDescription = null)
-                        },
+                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         modifier = Modifier.fillMaxWidth(),
@@ -143,9 +144,7 @@ fun LoginScreen(
                     Button(
                         onClick = { viewModel.login(email, password) },
                         enabled = estado !is AuthEstado.Cargando,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp),
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         if (estado is AuthEstado.Cargando) {
@@ -154,17 +153,11 @@ fun LoginScreen(
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
                         } else {
-                            Text(
-                                "Iniciar sesión",
-                                style = MaterialTheme.typography.titleMedium
-                            )
+                            Text("Iniciar sesión", style = MaterialTheme.typography.titleMedium)
                         }
                     }
 
-                    TextButton(
-                        onClick = onIrARegistro,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    TextButton(onClick = onIrARegistro, modifier = Modifier.fillMaxWidth()) {
                         Text("¿No tienes cuenta? Regístrate")
                     }
                 }

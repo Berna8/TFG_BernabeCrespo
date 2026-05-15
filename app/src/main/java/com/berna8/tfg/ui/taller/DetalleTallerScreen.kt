@@ -19,6 +19,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.berna8.tfg.data.model.Resena
 
+/**
+ * Pantalla de detalle de un taller.
+ * Muestra información del taller, imágenes, servicios, puntuación media y reseñas.
+ * Permite al cliente reservar una cita y añadir o eliminar su propia reseña.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetalleTallerScreen(
@@ -44,6 +49,7 @@ fun DetalleTallerScreen(
         resenaViewModel.comprobarResena(clienteUid, tallerUid)
     }
 
+    // Cierra el formulario cuando la reseña se publica con éxito
     LaunchedEffect(estadoResena) {
         if (estadoResena is ResenaEstado.Exito) {
             mostrarFormularioResena = false
@@ -57,22 +63,17 @@ fun DetalleTallerScreen(
                 title = { Text(taller?.nombre ?: "Taller") },
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 }
             )
         },
         bottomBar = {
+            // Oculta el botón de reservar cuando se muestra el formulario de reseña
             if (!mostrarFormularioResena) {
                 Button(
                     onClick = onReservar,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .height(52.dp),
+                    modifier = Modifier.fillMaxWidth().padding(16.dp).height(52.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text("Reservar cita")
@@ -81,9 +82,7 @@ fun DetalleTallerScreen(
         }
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier = Modifier.fillMaxSize().padding(paddingValues)
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -91,29 +90,25 @@ fun DetalleTallerScreen(
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 taller?.let { t ->
+                    // Primera imagen del taller
                     if (t.imagenes.isNotEmpty()) {
                         item {
                             AsyncImage(
                                 model = t.imagenes.first(),
                                 contentDescription = null,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(200.dp),
+                                modifier = Modifier.fillMaxWidth().height(200.dp),
                                 contentScale = ContentScale.Crop
                             )
                         }
                     }
 
+                    // Información básica y puntuación media
                     item {
                         Column(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                text = t.nombre,
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Text(text = t.nombre, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                             Text(text = "📍 ${t.direccion}")
                             Text(text = "📞 ${t.telefono}")
 
@@ -135,38 +130,28 @@ fun DetalleTallerScreen(
                         }
                     }
 
+                    // Lista de servicios
                     if (t.servicios.isNotEmpty()) {
                         item {
                             Column(
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Text(
-                                    text = "Servicios",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                t.servicios.forEach { servicio ->
-                                    Text(text = "• $servicio")
-                                }
+                                Text(text = "Servicios", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                t.servicios.forEach { servicio -> Text(text = "• $servicio") }
                             }
                         }
                     }
                 }
 
+                // Cabecera de reseñas con botón de añadir si el cliente no ha reseñado
                 item {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Reseñas",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(text = "Reseñas", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         if (!haResenado) {
                             TextButton(onClick = { mostrarFormularioResena = true }) {
                                 Text("Añadir reseña")
@@ -178,15 +163,10 @@ fun DetalleTallerScreen(
                 if (resenas.isEmpty()) {
                     item {
                         Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = "No hay reseñas todavía",
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
+                            Text(text = "No hay reseñas todavía", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                         }
                     }
                 } else {
@@ -194,9 +174,7 @@ fun DetalleTallerScreen(
                         TarjetaResena(
                             resena = resena,
                             clienteUid = clienteUid,
-                            onEliminar = {
-                                resenaViewModel.eliminarResena(resena.id, tallerUid)
-                            },
+                            onEliminar = { resenaViewModel.eliminarResena(resena.id, tallerUid) },
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
                     }
@@ -205,6 +183,7 @@ fun DetalleTallerScreen(
                 item { Spacer(modifier = Modifier.height(8.dp)) }
             }
 
+            // Formulario de nueva reseña superpuesto sobre el contenido
             if (mostrarFormularioResena) {
                 FormularioResena(
                     onPublicar = { puntuacionSeleccionada, comentarioEscrito ->
@@ -225,12 +204,16 @@ fun DetalleTallerScreen(
     }
 }
 
+/**
+ * Formulario para crear una nueva reseña.
+ * Permite seleccionar una puntuación del 1 al 5 y escribir un comentario.
+ */
 @Composable
 fun FormularioResena(
     onPublicar: (Int, String) -> Unit,
     onCancelar: () -> Unit
 ) {
-    var puntuacion by remember { mutableStateOf(5) }
+    var puntuacion by remember { mutableIntStateOf(5) }
     var comentario by remember { mutableStateOf("") }
 
     Surface(
@@ -238,31 +221,20 @@ fun FormularioResena(
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
+            modifier = Modifier.fillMaxSize().padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Nueva reseña",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
+            Text(text = "Nueva reseña", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(text = "Puntuación: $puntuacion", style = MaterialTheme.typography.titleSmall)
 
-            Text(
-                text = "Puntuación: $puntuacion",
-                style = MaterialTheme.typography.titleSmall
-            )
-
+            // Selector de estrellas interactivo
             Row {
                 repeat(5) { index ->
                     Text(
                         text = if (index < puntuacion) "★" else "☆",
                         style = MaterialTheme.typography.headlineLarge,
                         color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .clickable { puntuacion = index + 1 }
+                        modifier = Modifier.padding(4.dp).clickable { puntuacion = index + 1 }
                     )
                 }
             }
@@ -277,11 +249,7 @@ fun FormularioResena(
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
-                    onClick = onCancelar,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
+                OutlinedButton(onClick = onCancelar, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) {
                     Text("Cancelar")
                 }
                 Button(
@@ -297,12 +265,16 @@ fun FormularioResena(
     }
 }
 
+/**
+ * Tarjeta que muestra los detalles de una reseña.
+ * Si la reseña pertenece al cliente actual muestra un botón para eliminarla.
+ */
 @Composable
 fun TarjetaResena(
+    modifier: Modifier = Modifier,
     resena: Resena,
     clienteUid: String = "",
-    onEliminar: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onEliminar: () -> Unit = {}
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -317,30 +289,23 @@ fun TarjetaResena(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = resena.clienteNombre,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
+                Text(text = resena.clienteNombre, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = resena.fecha,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
+                    // Botón de eliminar solo visible para el autor de la reseña
                     if (resena.clienteUid == clienteUid) {
                         IconButton(onClick = onEliminar) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = "Eliminar reseña",
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(18.dp)
-                            )
+                            Icon(Icons.Default.Delete, contentDescription = "Eliminar reseña", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
                         }
                     }
                 }
             }
 
+            // Estrellas de puntuación
             Row {
                 repeat(5) { index ->
                     Text(
@@ -352,10 +317,7 @@ fun TarjetaResena(
             }
 
             if (resena.comentario.isNotBlank()) {
-                Text(
-                    text = resena.comentario,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text(text = resena.comentario, style = MaterialTheme.typography.bodyMedium)
             }
         }
     }

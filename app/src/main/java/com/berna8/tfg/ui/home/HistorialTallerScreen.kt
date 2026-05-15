@@ -19,6 +19,11 @@ import com.berna8.tfg.data.model.Reserva
 import com.berna8.tfg.ui.reserva.ReservaEstado
 import com.berna8.tfg.ui.reserva.ReservaViewModel
 
+/**
+ * Pantalla de historial de citas del taller.
+ * Muestra las citas confirmadas, completadas y canceladas.
+ * Permite buscar por matrícula y notificar que el coche está listo.
+ */
 @Composable
 fun HistorialTallerScreen(
     tallerUid: String,
@@ -28,6 +33,7 @@ fun HistorialTallerScreen(
     val estado by viewModel.estado.collectAsState()
     var busqueda by remember { mutableStateOf("") }
 
+    // Filtra las reservas por matrícula si hay texto en el buscador
     val reservasFiltradas = if (busqueda.isBlank()) reservas
     else reservas.filter { it.matriculaCoche.contains(busqueda, ignoreCase = true) }
 
@@ -47,14 +53,13 @@ fun HistorialTallerScreen(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
         )
 
+        // Campo de búsqueda por matrícula
         OutlinedTextField(
             value = busqueda,
             onValueChange = { busqueda = it },
             label = { Text("Buscar por matrícula") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             shape = RoundedCornerShape(12.dp),
             singleLine = true
         )
@@ -63,26 +68,17 @@ fun HistorialTallerScreen(
 
         when {
             estado is ReservaEstado.Cargando -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
             citasCompletadas.isEmpty() && citasCanceladas.isEmpty() && citasConfirmadas.isEmpty() -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = "📋",
-                            style = MaterialTheme.typography.headlineLarge
-                        )
+                        Text(text = "📋", style = MaterialTheme.typography.headlineLarge)
                         Text(
                             text = if (busqueda.isBlank()) "No hay historial todavía"
                             else "No se encontraron resultados",
@@ -94,12 +90,11 @@ fun HistorialTallerScreen(
             }
             else -> {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
+                    // Sección de citas confirmadas con botón de coche listo
                     if (citasConfirmadas.isNotEmpty()) {
                         item {
                             Text(
@@ -112,13 +107,12 @@ fun HistorialTallerScreen(
                         items(citasConfirmadas) { reserva ->
                             TarjetaHistorialTaller(
                                 reserva = reserva,
-                                onCocheListo = {
-                                    viewModel.marcarCocheListo(reserva.id, tallerUid)
-                                }
+                                onCocheListo = { viewModel.marcarCocheListo(reserva.id, tallerUid) }
                             )
                         }
                     }
 
+                    // Sección de citas completadas
                     if (citasCompletadas.isNotEmpty()) {
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
@@ -134,6 +128,7 @@ fun HistorialTallerScreen(
                         }
                     }
 
+                    // Sección de citas canceladas
                     if (citasCanceladas.isNotEmpty()) {
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
@@ -154,6 +149,10 @@ fun HistorialTallerScreen(
     }
 }
 
+/**
+ * Tarjeta que muestra los detalles de una reserva en el historial del taller.
+ * Si la reserva está confirmada y se pasa onCocheListo, muestra el botón de notificación.
+ */
 @Composable
 fun TarjetaHistorialTaller(
     reserva: Reserva,
@@ -174,16 +173,8 @@ fun TarjetaHistorialTaller(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        Icons.Default.Build,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = reserva.servicio,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Icon(Icons.Default.Build, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Text(text = reserva.servicio, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
                 EstadoChip(estado = reserva.estado)
             }
@@ -194,17 +185,8 @@ fun TarjetaHistorialTaller(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    Icons.Default.DateRange,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
-                )
-                Text(
-                    text = "${reserva.fecha} a las ${reserva.hora}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Icon(Icons.Default.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                Text(text = "${reserva.fecha} a las ${reserva.hora}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (reserva.marcaCoche.isNotBlank()) {
                 Spacer(modifier = Modifier.height(4.dp))
@@ -214,20 +196,19 @@ fun TarjetaHistorialTaller(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
             if (reserva.estado == "confirmada" && onCocheListo != null) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = onCocheListo,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
+                Button(onClick = onCocheListo, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
                     Text("🔔 Notificar coche listo")
                 }
             }
         }
     }
 }
+
+/**
+ * Chip que muestra el estado de una reserva con un color e icono representativo.
+ */
 @Composable
 fun EstadoChip(estado: String) {
     val (color, emoji) = when (estado) {

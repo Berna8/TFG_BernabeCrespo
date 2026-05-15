@@ -25,6 +25,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.berna8.tfg.data.model.Taller
 
+/**
+ * Pantalla de gestión del perfil del taller.
+ * Permite editar nombre, dirección, teléfono, servicios, horarios e imágenes.
+ * El taller solo aparece en la lista de búsqueda cuando tiene el perfil completo.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilTallerScreen(
@@ -44,6 +49,7 @@ fun PerfilTallerScreen(
     var nuevoHorario by remember { mutableStateOf("") }
     var horarioExpandido by remember { mutableStateOf(false) }
 
+    // Horarios predefinidos disponibles para seleccionar
     val horariosPredefinidos = listOf(
         "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
         "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
@@ -51,6 +57,7 @@ fun PerfilTallerScreen(
         "18:00", "18:30", "19:00"
     )
 
+    // Lanzador para seleccionar imagen de la galería
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -61,6 +68,7 @@ fun PerfilTallerScreen(
         viewModel.cargarTaller(tallerUid)
     }
 
+    // Sincroniza los campos con los datos del taller cargado
     LaunchedEffect(tallerActual) {
         tallerActual?.let {
             nombre = it.nombre
@@ -78,126 +86,57 @@ fun PerfilTallerScreen(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+        modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Mi taller",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
+        Text(text = "Mi taller", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text(text = "Datos del taller", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
 
-        Text(
-            text = "Datos del taller",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
-
-        OutlinedTextField(
-            value = nombre,
-            onValueChange = { nombre = it },
-            label = { Text("Nombre del taller") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        OutlinedTextField(
-            value = direccion,
-            onValueChange = { direccion = it },
-            label = { Text("Dirección") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        OutlinedTextField(
-            value = telefono,
-            onValueChange = { telefono = it },
-            label = { Text("Teléfono") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
+        OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre del taller") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
+        OutlinedTextField(value = direccion, onValueChange = { direccion = it }, label = { Text("Dirección") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
+        OutlinedTextField(value = telefono, onValueChange = { telefono = it }, label = { Text("Teléfono") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
 
         HorizontalDivider()
+        Text(text = "Servicios ofrecidos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
 
-        Text(
-            text = "Servicios ofrecidos",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedTextField(
-                value = nuevoServicio,
-                onValueChange = { nuevoServicio = it },
-                label = { Text("Nuevo servicio") },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp)
-            )
-            IconButton(
-                onClick = {
-                    if (nuevoServicio.isNotBlank()) {
-                        servicios = servicios + nuevoServicio
-                        nuevoServicio = ""
-                    }
+        // Campo para añadir nuevos servicios
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(value = nuevoServicio, onValueChange = { nuevoServicio = it }, label = { Text("Nuevo servicio") }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp))
+            IconButton(onClick = {
+                if (nuevoServicio.isNotBlank()) {
+                    servicios = servicios + nuevoServicio
+                    nuevoServicio = ""
                 }
-            ) {
+            }) {
                 Icon(Icons.Default.Add, contentDescription = "Añadir servicio")
             }
         }
 
+        // Lista de servicios con botón de eliminar
         servicios.forEach { servicio ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "• $servicio")
                 IconButton(onClick = { servicios = servicios - servicio }) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Eliminar",
-                        tint = MaterialTheme.colorScheme.error
-                    )
+                    Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
                 }
             }
         }
 
         HorizontalDivider()
+        Text(text = "Horarios disponibles", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
 
-        Text(
-            text = "Horarios disponibles",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
-
-        ExposedDropdownMenuBox(
-            expanded = horarioExpandido,
-            onExpandedChange = { horarioExpandido = it }
-        ) {
+        // Selector de horarios predefinidos
+        ExposedDropdownMenuBox(expanded = horarioExpandido, onExpandedChange = { horarioExpandido = it }) {
             OutlinedTextField(
                 value = nuevoHorario,
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Añadir horario") },
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = horarioExpandido)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = horarioExpandido) },
+                modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                 shape = RoundedCornerShape(12.dp)
             )
-            ExposedDropdownMenu(
-                expanded = horarioExpandido,
-                onDismissRequest = { horarioExpandido = false }
-            ) {
+            ExposedDropdownMenu(expanded = horarioExpandido, onDismissRequest = { horarioExpandido = false }) {
                 horariosPredefinidos.filter { !horarios.contains(it) }.forEach { horario ->
                     DropdownMenuItem(
                         text = { Text(horario) },
@@ -211,69 +150,45 @@ fun PerfilTallerScreen(
             }
         }
 
+        // Lista de horarios seleccionados con botón de eliminar
         horarios.forEach { horario ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "🕐 $horario")
                 IconButton(onClick = { horarios = horarios - horario }) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Eliminar",
-                        tint = MaterialTheme.colorScheme.error
-                    )
+                    Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
                 }
             }
         }
 
         HorizontalDivider()
-
-        Text(
-            text = "Imágenes del taller",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
+        Text(text = "Imágenes del taller", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
 
         val imagenes = tallerActual?.imagenes ?: emptyList()
 
+        // Botón para añadir imagen desde la galería
         OutlinedButton(
             onClick = { launcher.launch("image/*") },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             enabled = estado !is TallerEstado.Cargando
         ) {
-            if (estado is TallerEstado.Cargando) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp))
-            } else {
-                Text("Añadir imagen")
-            }
+            if (estado is TallerEstado.Cargando) CircularProgressIndicator(modifier = Modifier.size(20.dp))
+            else Text("Añadir imagen")
         }
 
+        // Carrusel horizontal de imágenes con botón de eliminar
         if (imagenes.isNotEmpty()) {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(imagenes) { url ->
                     Box {
                         AsyncImage(
                             model = url,
                             contentDescription = null,
-                            modifier = Modifier
-                                .size(120.dp)
-                                .clip(RoundedCornerShape(8.dp)),
+                            modifier = Modifier.size(120.dp).clip(RoundedCornerShape(8.dp)),
                             contentScale = ContentScale.Crop
                         )
-                        IconButton(
-                            onClick = { viewModel.eliminarImagen(url) },
-                            modifier = Modifier.align(Alignment.TopEnd)
-                        ) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = "Eliminar",
-                                tint = MaterialTheme.colorScheme.error
-                            )
+                        IconButton(onClick = { viewModel.eliminarImagen(url) }, modifier = Modifier.align(Alignment.TopEnd)) {
+                            Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
@@ -281,17 +196,8 @@ fun PerfilTallerScreen(
         }
 
         if (estado is TallerEstado.Error) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = (estado as TallerEstado.Error).mensaje,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(12.dp)
-                )
+            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer), modifier = Modifier.fillMaxWidth()) {
+                Text(text = (estado as TallerEstado.Error).mensaje, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(12.dp))
             }
         }
 
@@ -309,19 +215,12 @@ fun PerfilTallerScreen(
                     )
                 )
             },
-            enabled = estado !is TallerEstado.Cargando &&
-                    nombre.isNotBlank() &&
-                    direccion.isNotBlank(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
+            enabled = estado !is TallerEstado.Cargando && nombre.isNotBlank() && direccion.isNotBlank(),
+            modifier = Modifier.fillMaxWidth().height(52.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
             if (estado is TallerEstado.Cargando) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary)
             } else {
                 Text("Guardar")
             }

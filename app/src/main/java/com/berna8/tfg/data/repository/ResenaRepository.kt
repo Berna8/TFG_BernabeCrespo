@@ -7,11 +7,18 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Repositorio encargado de gestionar las reseñas de los talleres en Firestore.
+ */
 class ResenaRepository {
 
     private val firestore = FirebaseFirestore.getInstance()
     private val coleccion = firestore.collection("resenas")
 
+    /**
+     * Crea una nueva reseña en Firestore.
+     * Genera automáticamente el ID y asigna la fecha actual.
+     */
     suspend fun crearResena(resena: Resena): Result<Unit> {
         return try {
             val docRef = coleccion.document()
@@ -24,19 +31,25 @@ class ResenaRepository {
         }
     }
 
+    /**
+     * Obtiene todas las reseñas de un taller.
+     * Fuerza la lectura desde el servidor para evitar datos desactualizados.
+     */
     suspend fun obtenerResenasTaller(tallerUid: String): Result<List<Resena>> {
         return try {
             val resultado = coleccion
                 .whereEqualTo("tallerUid", tallerUid)
                 .get(com.google.firebase.firestore.Source.SERVER)
                 .await()
-            val resenas = resultado.toObjects(Resena::class.java)
-            Result.success(resenas)
+            Result.success(resultado.toObjects(Resena::class.java))
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
+    /**
+     * Comprueba si un cliente ya ha reseñado un taller concreto.
+     */
     suspend fun haResenado(clienteUid: String, tallerUid: String): Boolean {
         return try {
             val resultado = coleccion
@@ -50,6 +63,9 @@ class ResenaRepository {
         }
     }
 
+    /**
+     * Elimina una reseña de Firestore.
+     */
     suspend fun eliminarResena(resenaId: String): Result<Unit> {
         return try {
             coleccion.document(resenaId).delete().await()

@@ -19,6 +19,10 @@ import com.berna8.tfg.data.model.Reserva
 import com.berna8.tfg.ui.reserva.ReservaEstado
 import com.berna8.tfg.ui.reserva.ReservaViewModel
 
+/**
+ * Pantalla principal del taller que muestra las citas pendientes de confirmar o rechazar.
+ * Al cargar comprueba si hay notificaciones pendientes para el taller.
+ */
 @Composable
 fun HomeTallerScreen(
     tallerUid: String,
@@ -44,31 +48,18 @@ fun HomeTallerScreen(
 
         when {
             estado is ReservaEstado.Cargando -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
             reservasPendientes.isEmpty() -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = "📅",
-                            style = MaterialTheme.typography.headlineLarge
-                        )
-                        Text(
-                            text = "No hay citas pendientes",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(text = "📅", style = MaterialTheme.typography.headlineLarge)
+                        Text(text = "No hay citas pendientes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         Text(
                             text = "Las nuevas citas aparecerán aquí",
                             style = MaterialTheme.typography.bodyMedium,
@@ -79,27 +70,17 @@ fun HomeTallerScreen(
             }
             else -> {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(vertical = 16.dp)
                 ) {
                     items(reservasPendientes) { reserva ->
                         TarjetaReservaTaller(
                             reserva = reserva,
-                            onConfirmar = {
-                                viewModel.confirmarReserva(reserva.id, tallerUid)
-                            },
-                            onCancelar = {
-                                viewModel.cancelarReserva(reserva.id, tallerUid, true)
-                            },
-                            onEliminar = {
-                                viewModel.eliminarReserva(reserva.id, tallerUid, true)
-                            },
-                            onCocheListo = {
-                                viewModel.marcarCocheListo(reserva.id, tallerUid)
-                            }
+                            onConfirmar = { viewModel.confirmarReserva(reserva.id, tallerUid) },
+                            onCancelar = { viewModel.cancelarReserva(reserva.id, tallerUid, true) },
+                            onEliminar = { viewModel.eliminarReserva(reserva.id, tallerUid, true) },
+                            onCocheListo = { viewModel.marcarCocheListo(reserva.id, tallerUid) }
                         )
                     }
                 }
@@ -108,6 +89,10 @@ fun HomeTallerScreen(
     }
 }
 
+/**
+ * Tarjeta de una reserva pendiente con acciones para confirmar, rechazar,
+ * eliminar o notificar que el coche está listo.
+ */
 @Composable
 fun TarjetaReservaTaller(
     reserva: Reserva,
@@ -121,28 +106,15 @@ fun TarjetaReservaTaller(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Build,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = reserva.servicio,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Icon(Icons.Default.Build, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Text(text = reserva.servicio, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
                 EstadoChip(estado = reserva.estado)
             }
@@ -151,21 +123,9 @@ fun TarjetaReservaTaller(
             HorizontalDivider()
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    Icons.Default.DateRange,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
-                )
-                Text(
-                    text = "${reserva.fecha} a las ${reserva.hora}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(Icons.Default.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                Text(text = "${reserva.fecha} a las ${reserva.hora}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             if (reserva.marcaCoche.isNotBlank()) {
@@ -179,58 +139,36 @@ fun TarjetaReservaTaller(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Botones de acción según el estado de la reserva
             when (reserva.estado) {
                 "cancelada" -> {
                     OutlinedButton(
                         onClick = onEliminar,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text("Eliminar")
-                    }
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) { Text("Eliminar") }
                 }
                 "pendiente" -> {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(
                             onClick = onCancelar,
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error
-                            )
-                        ) {
-                            Text("Rechazar")
-                        }
-                        Button(
-                            onClick = onConfirmar,
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                        ) { Text("Rechazar") }
+                        Button(onClick = onConfirmar, modifier = Modifier.weight(1f), shape = RoundedCornerShape(8.dp)) {
                             Text("Confirmar")
                         }
                     }
                 }
                 "confirmada" -> {
                     if (!reserva.cocheListoParaRecoger) {
-                        Button(
-                            onClick = onCocheListo,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
+                        Button(onClick = onCocheListo, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
                             Text("🔔 Notificar coche listo")
                         }
                     } else {
-                        Text(
-                            text = "✅ Cliente notificado",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Text(text = "✅ Cliente notificado", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }

@@ -11,6 +11,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
+/**
+ * Pantalla que muestra los talleres marcados como favoritos por el cliente.
+ * Permite navegar al detalle de cada taller favorito.
+ */
 @Composable
 fun FavoritosScreen(
     clienteUid: String,
@@ -25,44 +29,25 @@ fun FavoritosScreen(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Mis favoritos",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
+        Text(text = "Mis favoritos", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
 
         when {
             estado is FavoritosEstado.Cargando -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
             favoritos.isEmpty() -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = "❤️",
-                            style = MaterialTheme.typography.headlineLarge
-                        )
-                        Text(
-                            text = "No tienes favoritos todavía",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(text = "❤️", style = MaterialTheme.typography.headlineLarge)
+                        Text(text = "No tienes favoritos todavía", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         Text(
                             text = "Añade talleres a favoritos para acceder rápidamente",
                             style = MaterialTheme.typography.bodyMedium,
@@ -72,9 +57,7 @@ fun FavoritosScreen(
                 }
             }
             else -> {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(favoritos) { taller ->
                         TarjetaTaller(
                             taller = taller,

@@ -16,6 +16,11 @@ import com.berna8.tfg.ui.reserva.ReservaViewModel
 import com.berna8.tfg.ui.taller.BuscarTalleresScreen
 import com.berna8.tfg.ui.taller.FavoritosScreen
 
+/**
+ * Pantalla principal del cliente con barra de navegación inferior.
+ * Gestiona las pestañas: Buscar, Favoritos, Citas y Cuenta.
+ * Al iniciar comprueba si hay notificaciones pendientes para el cliente.
+ */
 @Composable
 fun PantallaClientePrincipal(
     clienteUid: String,
@@ -28,6 +33,7 @@ fun PantallaClientePrincipal(
     val context = LocalContext.current
     val reservaViewModel: ReservaViewModel = viewModel()
 
+    // Comprueba notificaciones pendientes al entrar a la pantalla principal
     LaunchedEffect(clienteUid) {
         reservaViewModel.comprobarNotificaciones(clienteUid, context)
     }
@@ -38,9 +44,7 @@ fun PantallaClientePrincipal(
                 rutaActual = rutaActual,
                 onItemSeleccionado = { ruta ->
                     navController.navigate(ruta) {
-                        popUpTo(ItemNavegacion.Buscar.ruta) {
-                            saveState = true
-                        }
+                        popUpTo(ItemNavegacion.Buscar.ruta) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -56,32 +60,20 @@ fun PantallaClientePrincipal(
             composable(ItemNavegacion.Buscar.ruta) {
                 BuscarTalleresScreen(
                     clienteUid = clienteUid,
-                    onTallerSeleccionado = { tallerUid ->
-                        onTallerSeleccionado(tallerUid)
-                    }
+                    onTallerSeleccionado = { tallerUid -> onTallerSeleccionado(tallerUid) }
                 )
             }
-
             composable(ItemNavegacion.Favoritos.ruta) {
                 FavoritosScreen(
                     clienteUid = clienteUid,
-                    onTallerSeleccionado = { tallerUid ->
-                        onTallerSeleccionado(tallerUid)
-                    }
+                    onTallerSeleccionado = { tallerUid -> onTallerSeleccionado(tallerUid) }
                 )
             }
-
             composable(ItemNavegacion.Citas.ruta) {
-                HistorialCitasScreen(
-                    clienteUid = clienteUid
-                )
+                HistorialCitasScreen(clienteUid = clienteUid)
             }
-
             composable(ItemNavegacion.Cuenta.ruta) {
-                CuentaScreen(
-                    uid = clienteUid,
-                    onCerrarSesion = onCerrarSesion,
-                )
+                CuentaScreen(uid = clienteUid, onCerrarSesion = onCerrarSesion)
             }
         }
     }

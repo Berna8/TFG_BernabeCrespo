@@ -11,12 +11,19 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 
+/**
+ * Repositorio encargado de subir imágenes a Cloudinary.
+ * Gestiona tanto las imágenes del taller como las fotos de perfil de los usuarios.
+ */
 class StorageRepository(private val context: Context) {
 
     private val cloudName = "dyjqkrshk"
     private val uploadPreset = "autocita_preset"
     private val client = OkHttpClient()
 
+    /**
+     * Sube una imagen del taller a Cloudinary y devuelve la URL segura.
+     */
     suspend fun subirImagenTaller(uri: Uri): Result<String> {
         return withContext(Dispatchers.IO) {
             try {
@@ -27,11 +34,7 @@ class StorageRepository(private val context: Context) {
 
                 val requestBody = MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    .addFormDataPart(
-                        "file",
-                        "image.jpg",
-                        bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
-                    )
+                    .addFormDataPart("file", "image.jpg", bytes.toRequestBody("image/jpeg".toMediaTypeOrNull()))
                     .addFormDataPart("upload_preset", uploadPreset)
                     .build()
 
@@ -44,8 +47,7 @@ class StorageRepository(private val context: Context) {
                 val responseBody = response.body?.string()
                     ?: return@withContext Result.failure(Exception("Respuesta vacía"))
 
-                val json = JSONObject(responseBody)
-                val url = json.getString("secure_url")
+                val url = JSONObject(responseBody).getString("secure_url")
                 Result.success(url)
             } catch (e: Exception) {
                 Result.failure(e)
@@ -53,6 +55,10 @@ class StorageRepository(private val context: Context) {
         }
     }
 
+    /**
+     * Sube la foto de perfil de un usuario a Cloudinary.
+     * Usa un timestamp en el ID para forzar la actualización de la caché.
+     */
     suspend fun subirFotoPerfil(uid: String, uri: Uri): Result<String> {
         return withContext(Dispatchers.IO) {
             try {
@@ -61,16 +67,11 @@ class StorageRepository(private val context: Context) {
                 val bytes = inputStream.readBytes()
                 inputStream.close()
 
-                val timestamp = System.currentTimeMillis()
-                val publicId = "perfiles/${uid}_$timestamp"
+                val publicId = "perfiles/${uid}_${System.currentTimeMillis()}"
 
                 val requestBody = MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    .addFormDataPart(
-                        "file",
-                        "perfil.jpg",
-                        bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
-                    )
+                    .addFormDataPart("file", "perfil.jpg", bytes.toRequestBody("image/jpeg".toMediaTypeOrNull()))
                     .addFormDataPart("upload_preset", uploadPreset)
                     .addFormDataPart("public_id", publicId)
                     .build()
@@ -84,8 +85,7 @@ class StorageRepository(private val context: Context) {
                 val responseBody = response.body?.string()
                     ?: return@withContext Result.failure(Exception("Respuesta vacía"))
 
-                val json = JSONObject(responseBody)
-                val url = json.getString("secure_url")
+                val url = JSONObject(responseBody).getString("secure_url")
                 Result.success(url)
             } catch (e: Exception) {
                 Result.failure(e)

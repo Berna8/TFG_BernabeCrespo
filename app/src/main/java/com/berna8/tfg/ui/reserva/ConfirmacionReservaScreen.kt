@@ -15,6 +15,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
+/**
+ * Pantalla de confirmación que se muestra tras crear una reserva con éxito.
+ * Muestra una animación de check y navega automáticamente al inicio tras 3 segundos.
+ */
 @Composable
 fun ConfirmacionReservaScreen(
     servicio: String,
@@ -24,6 +28,7 @@ fun ConfirmacionReservaScreen(
 ) {
     var animacionIniciada by remember { mutableStateOf(false) }
 
+    // Animación de escala con efecto de rebote
     val escala by animateFloatAsState(
         targetValue = if (animacionIniciada) 1f else 0f,
         animationSpec = spring(
@@ -33,6 +38,7 @@ fun ConfirmacionReservaScreen(
         label = "escala"
     )
 
+    // Inicia la animación y navega automáticamente tras 3 segundos
     LaunchedEffect(Unit) {
         animacionIniciada = true
         delay(3000)
@@ -48,10 +54,9 @@ fun ConfirmacionReservaScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             modifier = Modifier.padding(32.dp)
         ) {
+            // Icono animado de confirmación
             Surface(
-                modifier = Modifier
-                    .size(120.dp)
-                    .scale(escala),
+                modifier = Modifier.size(120.dp).scale(escala),
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
@@ -79,9 +84,7 @@ fun ConfirmacionReservaScreen(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
 
-            LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth()
-            )
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
     }
 }

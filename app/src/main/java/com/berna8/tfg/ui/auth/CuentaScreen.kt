@@ -19,9 +19,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import coil.request.CachePolicy
+import coil.request.ImageRequest
 
+/**
+ * Pantalla de cuenta del usuario.
+ * Permite ver y editar el perfil, cambiar la foto y cerrar sesión.
+ */
 @Composable
 fun CuentaScreen(
     uid: String,
@@ -36,6 +40,7 @@ fun CuentaScreen(
     var nombreUsuario by remember { mutableStateOf("") }
     var editando by remember { mutableStateOf(false) }
 
+    // Lanzador para seleccionar imagen de la galería
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -46,6 +51,7 @@ fun CuentaScreen(
         viewModel.cargarUsuario(uid)
     }
 
+    // Sincroniza los campos de texto con los datos del usuario cargado
     LaunchedEffect(usuario) {
         usuario?.let {
             nombre = it.nombre
@@ -53,6 +59,7 @@ fun CuentaScreen(
         }
     }
 
+    // Cierra el modo edición cuando el perfil se actualiza correctamente
     LaunchedEffect(perfilActualizado) {
         if (perfilActualizado) {
             editando = false
@@ -76,6 +83,7 @@ fun CuentaScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Foto de perfil — al pulsar abre la galería
         Surface(
             modifier = Modifier
                 .size(100.dp)

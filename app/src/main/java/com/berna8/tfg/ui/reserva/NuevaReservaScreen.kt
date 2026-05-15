@@ -19,6 +19,11 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * Pantalla para crear una nueva reserva en un taller.
+ * El cliente selecciona servicio, fecha, hora y datos del vehículo.
+ * Filtra automáticamente las horas ocupadas y las horas pasadas del día actual.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NuevaReservaScreen(
@@ -47,6 +52,7 @@ fun NuevaReservaScreen(
     val fechaFormateada = fechaSeleccionada?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: ""
     val horaFormateada = horaSeleccionada?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
 
+    // Solo permite seleccionar fechas desde hoy
     val datePickerState = rememberDatePickerState(
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
@@ -59,6 +65,7 @@ fun NuevaReservaScreen(
         tallerViewModel.cargarTaller(tallerUid)
     }
 
+    // Recarga las horas ocupadas cuando cambia la fecha o el servicio
     LaunchedEffect(fechaFormateada, servicio) {
         if (fechaFormateada.isNotBlank() && servicio.isNotBlank()) {
             reservaViewModel.cargarHorasOcupadas(tallerUid, fechaFormateada, servicio)
@@ -66,6 +73,7 @@ fun NuevaReservaScreen(
         }
     }
 
+    // Navega a la confirmación cuando la reserva se crea con éxito
     LaunchedEffect(estado) {
         if (estado is ReservaEstado.Exito) {
             onReservaCreada(servicio, fechaFormateada, horaFormateada)
@@ -80,23 +88,17 @@ fun NuevaReservaScreen(
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
                         fechaSeleccionada = LocalDate.ofEpochDay(millis / 86400000)
-                        val fechaStr = fechaSeleccionada?.format(
-                            DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                        ) ?: ""
+                        val fechaStr = fechaSeleccionada?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: ""
                         if (servicio.isNotBlank()) {
                             reservaViewModel.cargarHorasOcupadas(tallerUid, fechaStr, servicio)
                         }
                         horaSeleccionada = null
                     }
                     mostrarDatePicker = false
-                }) {
-                    Text("Aceptar")
-                }
+                }) { Text("Aceptar") }
             },
             dismissButton = {
-                TextButton(onClick = { mostrarDatePicker = false }) {
-                    Text("Cancelar")
-                }
+                TextButton(onClick = { mostrarDatePicker = false }) { Text("Cancelar") }
             }
         ) {
             DatePicker(state = datePickerState)
@@ -109,10 +111,7 @@ fun NuevaReservaScreen(
                 title = { Text("Nueva reserva") },
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 }
             )
@@ -126,76 +125,44 @@ fun NuevaReservaScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Tarjeta con información del taller seleccionado
             taller?.let {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = it.nombre,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = it.direccion,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
+                        Text(text = it.nombre, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(text = it.direccion, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
                 }
             }
 
-            Text(
-                text = "Servicio",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Text(text = "Servicio", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
 
+            // Selector de servicio
             val servicios = taller?.servicios ?: emptyList()
-
-            ExposedDropdownMenuBox(
-                expanded = servicioExpandido,
-                onExpandedChange = { servicioExpandido = it }
-            ) {
+            ExposedDropdownMenuBox(expanded = servicioExpandido, onExpandedChange = { servicioExpandido = it }) {
                 OutlinedTextField(
                     value = servicio,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Selecciona un servicio") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = servicioExpandido)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = servicioExpandido) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                     shape = RoundedCornerShape(12.dp)
                 )
-                ExposedDropdownMenu(
-                    expanded = servicioExpandido,
-                    onDismissRequest = { servicioExpandido = false }
-                ) {
+                ExposedDropdownMenu(expanded = servicioExpandido, onDismissRequest = { servicioExpandido = false }) {
                     servicios.forEach { s ->
-                        DropdownMenuItem(
-                            text = { Text(s) },
-                            onClick = {
-                                servicio = s
-                                servicioExpandido = false
-                            }
-                        )
+                        DropdownMenuItem(text = { Text(s) }, onClick = { servicio = s; servicioExpandido = false })
                     }
                 }
             }
 
-            Text(
-                text = "Fecha y hora",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Text(text = "Fecha y hora", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
 
+            // Selector de fecha
             OutlinedTextField(
                 value = fechaFormateada,
                 onValueChange = {},
@@ -210,14 +177,15 @@ fun NuevaReservaScreen(
                 shape = RoundedCornerShape(12.dp)
             )
 
+            // Filtra horas ocupadas y horas pasadas si la fecha es hoy
             val ahora = LocalTime.now()
+            val esHoy = fechaSeleccionada?.isEqual(LocalDate.now()) == true
             val horasDisponibles = (taller?.horariosDisponibles ?: emptyList())
                 .filter { hora ->
-                    !horasOcupadas.contains(hora) &&
-                            (fechaSeleccionada?.isAfter(LocalDate.now()) == true ||
-                                    LocalTime.parse(hora).isAfter(ahora))
+                    !horasOcupadas.contains(hora) && (!esHoy || LocalTime.parse(hora) > ahora)
                 }
 
+            // Selector de hora
             ExposedDropdownMenuBox(
                 expanded = horaExpandida,
                 onExpandedChange = { if (fechaFormateada.isNotBlank()) horaExpandida = it }
@@ -227,80 +195,37 @@ fun NuevaReservaScreen(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(if (fechaFormateada.isBlank()) "Selecciona primero una fecha" else "Hora") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = horaExpandida)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = horaExpandida) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                     shape = RoundedCornerShape(12.dp),
                     enabled = fechaFormateada.isNotBlank()
                 )
-                ExposedDropdownMenu(
-                    expanded = horaExpandida,
-                    onDismissRequest = { horaExpandida = false }
-                ) {
+                ExposedDropdownMenu(expanded = horaExpandida, onDismissRequest = { horaExpandida = false }) {
                     if (horasDisponibles.isEmpty()) {
-                        DropdownMenuItem(
-                            text = { Text("No hay horas disponibles") },
-                            onClick = { horaExpandida = false }
-                        )
+                        DropdownMenuItem(text = { Text("No hay horas disponibles") }, onClick = { horaExpandida = false })
                     } else {
                         horasDisponibles.forEach { hora ->
                             DropdownMenuItem(
                                 text = { Text(hora) },
-                                onClick = {
-                                    horaSeleccionada = LocalTime.parse(hora)
-                                    horaExpandida = false
-                                }
+                                onClick = { horaSeleccionada = LocalTime.parse(hora); horaExpandida = false }
                             )
                         }
                     }
                 }
             }
 
-            Text(
-                text = "Datos del vehículo",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Text(text = "Datos del vehículo", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
 
-            OutlinedTextField(
-                value = marcaCoche,
-                onValueChange = { marcaCoche = it },
-                label = { Text("Marca") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            OutlinedTextField(
-                value = modeloCoche,
-                onValueChange = { modeloCoche = it },
-                label = { Text("Modelo") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            OutlinedTextField(
-                value = matriculaCoche,
-                onValueChange = { matriculaCoche = it },
-                label = { Text("Matrícula") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
+            OutlinedTextField(value = marcaCoche, onValueChange = { marcaCoche = it }, label = { Text("Marca") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
+            OutlinedTextField(value = modeloCoche, onValueChange = { modeloCoche = it }, label = { Text("Modelo") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
+            OutlinedTextField(value = matriculaCoche, onValueChange = { matriculaCoche = it }, label = { Text("Matrícula") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
 
             if (estado is ReservaEstado.Error) {
                 Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    ),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = (estado as ReservaEstado.Error).mensaje,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(12.dp)
-                    )
+                    Text(text = (estado as ReservaEstado.Error).mensaje, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(12.dp))
                 }
             }
 
@@ -320,22 +245,14 @@ fun NuevaReservaScreen(
                     )
                 },
                 enabled = estado !is ReservaEstado.Cargando &&
-                        servicio.isNotBlank() &&
-                        fechaFormateada.isNotBlank() &&
-                        horaFormateada.isNotBlank() &&
-                        marcaCoche.isNotBlank() &&
-                        modeloCoche.isNotBlank() &&
-                        matriculaCoche.isNotBlank(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
+                        servicio.isNotBlank() && fechaFormateada.isNotBlank() &&
+                        horaFormateada.isNotBlank() && marcaCoche.isNotBlank() &&
+                        modeloCoche.isNotBlank() && matriculaCoche.isNotBlank(),
+                modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 if (estado is ReservaEstado.Cargando) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary)
                 } else {
                     Text("Confirmar reserva")
                 }

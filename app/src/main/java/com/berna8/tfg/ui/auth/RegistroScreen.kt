@@ -22,6 +22,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.berna8.tfg.R
 
+/**
+ * Pantalla de registro de nuevos usuarios.
+ * Permite crear una cuenta como cliente o como taller.
+ */
 @Composable
 fun RegistroScreen(
     onRegistroExitoso: (String, String) -> Unit,
@@ -35,11 +39,10 @@ fun RegistroScreen(
     var password by remember { mutableStateOf("") }
     var rolSeleccionado by remember { mutableStateOf("cliente") }
 
+    // Navega según el resultado del registro
     LaunchedEffect(estado) {
         when (estado) {
-            is AuthEstado.EmailNoVerificado -> {
-                onRegistroExitoso("", "")
-            }
+            is AuthEstado.EmailNoVerificado -> onRegistroExitoso("", "")
             is AuthEstado.Exito -> {
                 onRegistroExitoso(
                     (estado as AuthEstado.Exito).rol,
@@ -60,7 +63,7 @@ fun RegistroScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Bottom
         ) {
-            // Cabecera
+            // Cabecera con logo
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -82,13 +85,11 @@ fun RegistroScreen(
                 }
             }
 
-            // Tarjeta de registro
+            // Tarjeta de formulario de registro
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(
                     modifier = Modifier
@@ -107,9 +108,7 @@ fun RegistroScreen(
                         value = nombre,
                         onValueChange = { nombre = it },
                         label = { Text("Nombre completo") },
-                        leadingIcon = {
-                            Icon(Icons.Default.Person, contentDescription = null)
-                        },
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -118,9 +117,7 @@ fun RegistroScreen(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Correo electrónico") },
-                        leadingIcon = {
-                            Icon(Icons.Default.Email, contentDescription = null)
-                        },
+                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
@@ -130,9 +127,7 @@ fun RegistroScreen(
                         value = password,
                         onValueChange = { password = it },
                         label = { Text("Contraseña") },
-                        leadingIcon = {
-                            Icon(Icons.Default.Lock, contentDescription = null)
-                        },
+                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         modifier = Modifier.fillMaxWidth(),
@@ -145,81 +140,55 @@ fun RegistroScreen(
                         fontWeight = FontWeight.Medium
                     )
 
+                    // Selector de rol: cliente o taller
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Opción Cliente
                         Card(
-                            modifier = Modifier
-                                .weight(1f),
+                            modifier = Modifier.weight(1f),
                             colors = CardDefaults.cardColors(
                                 containerColor = if (rolSeleccionado == "cliente")
                                     MaterialTheme.colorScheme.primaryContainer
-                                else
-                                    MaterialTheme.colorScheme.surfaceVariant
+                                else MaterialTheme.colorScheme.surfaceVariant
                             ),
                             onClick = { rolSeleccionado = "cliente" }
                         ) {
                             Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(text = "🧑", style = MaterialTheme.typography.headlineMedium)
                                 Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "Cliente",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "Reserva citas",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Text(text = "Cliente", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                Text(text = "Reserva citas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
 
-                        // Opción Taller
                         Card(
                             modifier = Modifier.weight(1f),
                             colors = CardDefaults.cardColors(
                                 containerColor = if (rolSeleccionado == "taller")
                                     MaterialTheme.colorScheme.primaryContainer
-                                else
-                                    MaterialTheme.colorScheme.surfaceVariant
+                                else MaterialTheme.colorScheme.surfaceVariant
                             ),
                             onClick = { rolSeleccionado = "taller" }
                         ) {
                             Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(text = "🔧", style = MaterialTheme.typography.headlineMedium)
                                 Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "Taller",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "Gestiona citas",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Text(text = "Taller", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                Text(text = "Gestiona citas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
 
                     if (estado is AuthEstado.Error) {
                         Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer
-                            ),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
@@ -234,28 +203,17 @@ fun RegistroScreen(
                     Button(
                         onClick = { viewModel.registrar(nombre, email, password, rolSeleccionado) },
                         enabled = estado !is AuthEstado.Cargando,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp),
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         if (estado is AuthEstado.Cargando) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary)
                         } else {
-                            Text(
-                                "Crear cuenta",
-                                style = MaterialTheme.typography.titleMedium
-                            )
+                            Text("Crear cuenta", style = MaterialTheme.typography.titleMedium)
                         }
                     }
 
-                    TextButton(
-                        onClick = onIrALogin,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    TextButton(onClick = onIrALogin, modifier = Modifier.fillMaxWidth()) {
                         Text("¿Ya tienes cuenta? Inicia sesión")
                     }
                 }

@@ -14,6 +14,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.berna8.tfg.data.model.Reserva
 import com.berna8.tfg.ui.home.EstadoChip
 
+/**
+ * Pantalla que muestra el historial de citas del cliente.
+ * Separa las citas en próximas (pendiente/confirmada) y anteriores (cancelada/completada).
+ * Permite cancelar citas próximas y eliminar citas anteriores.
+ */
 @Composable
 fun HistorialCitasScreen(
     clienteUid: String,
@@ -39,42 +44,28 @@ fun HistorialCitasScreen(
 
         when {
             estado is ReservaEstado.Cargando -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
             reservas.isEmpty() -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = "📋",
-                            style = MaterialTheme.typography.headlineLarge
-                        )
-                        Text(
-                            text = "No tienes citas",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(text = "📋", style = MaterialTheme.typography.headlineLarge)
+                        Text(text = "No tienes citas", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                 }
             }
             else -> {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(vertical = 16.dp)
                 ) {
+                    // Citas próximas con opción de cancelar
                     if (citasFuturas.isNotEmpty()) {
                         item {
                             Text(
@@ -87,12 +78,11 @@ fun HistorialCitasScreen(
                         items(citasFuturas) { reserva ->
                             TarjetaHistorial(
                                 reserva = reserva,
-                                onCancelar = {
-                                    viewModel.cancelarReserva(reserva.id, clienteUid, false)
-                                }
+                                onCancelar = { viewModel.cancelarReserva(reserva.id, clienteUid, false) }
                             )
                         }
                     }
+                    // Citas anteriores con opción de eliminar
                     if (citasPasadas.isNotEmpty()) {
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
@@ -106,9 +96,7 @@ fun HistorialCitasScreen(
                         items(citasPasadas) { reserva ->
                             TarjetaHistorial(
                                 reserva = reserva,
-                                onEliminar = {
-                                    viewModel.eliminarReserva(reserva.id, clienteUid, false)
-                                }
+                                onEliminar = { viewModel.eliminarReserva(reserva.id, clienteUid, false) }
                             )
                         }
                     }
@@ -118,6 +106,10 @@ fun HistorialCitasScreen(
     }
 }
 
+/**
+ * Tarjeta que muestra los detalles de una reserva en el historial del cliente.
+ * Muestra botón de cancelar si se pasa onCancelar, o de eliminar si se pasa onEliminar.
+ */
 @Composable
 fun TarjetaHistorial(
     reserva: Reserva,
@@ -138,18 +130,11 @@ fun TarjetaHistorial(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = reserva.servicio,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Text(text = reserva.servicio, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 EstadoChip(estado = reserva.estado)
             }
             HorizontalDivider()
-            Text(
-                text = "📅 ${reserva.fecha} a las ${reserva.hora}",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text(text = "📅 ${reserva.fecha} a las ${reserva.hora}", style = MaterialTheme.typography.bodyMedium)
             if (reserva.marcaCoche.isNotBlank()) {
                 Text(
                     text = "🚗 ${reserva.marcaCoche} ${reserva.modeloCoche} - ${reserva.matriculaCoche}",
@@ -157,31 +142,21 @@ fun TarjetaHistorial(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
-
             if (onCancelar != null) {
                 OutlinedButton(
                     onClick = onCancelar,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Cancelar cita")
-                }
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text("Cancelar cita") }
             }
-
             if (onEliminar != null) {
                 OutlinedButton(
                     onClick = onEliminar,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Eliminar")
-                }
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text("Eliminar") }
             }
         }
     }

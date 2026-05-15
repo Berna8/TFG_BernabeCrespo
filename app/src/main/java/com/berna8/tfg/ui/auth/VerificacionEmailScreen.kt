@@ -11,6 +11,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
+/**
+ * Pantalla que se muestra tras el registro para que el usuario verifique su email.
+ * Permite reenviar el email de verificación y comprobar si ya se ha verificado.
+ */
 @Composable
 fun VerificacionEmailScreen(
     onEmailVerificado: () -> Unit,
@@ -20,6 +24,7 @@ fun VerificacionEmailScreen(
     val estado by viewModel.estado.collectAsState()
     var mensajeReenvio by remember { mutableStateOf(false) }
 
+    // Navega al login cuando el email ha sido verificado correctamente
     LaunchedEffect(estado) {
         if (estado is AuthEstado.Exito) {
             onEmailVerificado()
@@ -27,19 +32,14 @@ fun VerificacionEmailScreen(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
+        modifier = Modifier.fillMaxSize().padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "📧",
-                style = MaterialTheme.typography.displayMedium
-            )
+            Text(text = "📧", style = MaterialTheme.typography.displayMedium)
 
             Text(
                 text = "Verifica tu email",
@@ -56,9 +56,7 @@ fun VerificacionEmailScreen(
 
             if (estado is AuthEstado.Error) {
                 Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    ),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
@@ -72,9 +70,7 @@ fun VerificacionEmailScreen(
 
             if (mensajeReenvio) {
                 Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
@@ -88,17 +84,12 @@ fun VerificacionEmailScreen(
 
             Button(
                 onClick = { viewModel.verificarEmail() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
+                modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(12.dp),
                 enabled = estado !is AuthEstado.Cargando
             ) {
                 if (estado is AuthEstado.Cargando) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary)
                 } else {
                     Text("Ya he verificado mi email")
                 }
@@ -109,9 +100,7 @@ fun VerificacionEmailScreen(
                     viewModel.reenviarEmailVerificacion()
                     mensajeReenvio = true
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
+                modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Reenviar email")

@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
+/** Esquema de colores para el modo claro */
 private val EsquemaClaro = lightColorScheme(
     primary = AzulPrimario,
     onPrimary = Blanco,
@@ -28,6 +29,7 @@ private val EsquemaClaro = lightColorScheme(
     onError = Blanco
 )
 
+/** Esquema de colores para el modo oscuro */
 private val EsquemaOscuro = darkColorScheme(
     primary = AzulClaro,
     onPrimary = AzulOscuro,
@@ -45,6 +47,11 @@ private val EsquemaOscuro = darkColorScheme(
     onError = Rojo
 )
 
+/**
+ * Tema principal de la aplicación AutoCita.
+ * Aplica automáticamente el modo claro u oscuro según las preferencias del sistema.
+ * Ajusta el color de la barra de estado según el tema activo.
+ */
 @Composable
 fun TFGTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

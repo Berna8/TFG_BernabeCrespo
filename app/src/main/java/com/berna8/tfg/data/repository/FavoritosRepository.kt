@@ -4,23 +4,26 @@ import com.berna8.tfg.data.model.Taller
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
+/**
+ * Repositorio encargado de gestionar los talleres favoritos de un cliente.
+ * Los favoritos se almacenan como una lista de IDs en el documento del usuario en Firestore.
+ */
 class FavoritosRepository {
 
     private val firestore = FirebaseFirestore.getInstance()
+
+    /**
+     * Obtiene la lista de talleres favoritos de un cliente.
+     * Recupera los IDs almacenados en el usuario y carga cada taller individualmente.
+     */
     suspend fun obtenerFavoritos(clienteUid: String): Result<List<Taller>> {
         return try {
-            val doc = firestore.collection("usuarios")
-                .document(clienteUid)
-                .get()
-                .await()
+            val doc = firestore.collection("usuarios").document(clienteUid).get().await()
             @Suppress("UNCHECKED_CAST")
             val tallerIds = doc.get("favoritos") as? List<String> ?: emptyList()
             val talleres = mutableListOf<Taller>()
             tallerIds.forEach { tallerId ->
-                val tallerDoc = firestore.collection("talleres")
-                    .document(tallerId)
-                    .get()
-                    .await()
+                val tallerDoc = firestore.collection("talleres").document(tallerId).get().await()
                 tallerDoc.toObject(Taller::class.java)?.let { talleres.add(it) }
             }
             Result.success(talleres)
@@ -29,6 +32,9 @@ class FavoritosRepository {
         }
     }
 
+    /**
+     * Añade un taller a la lista de favoritos del cliente si no está ya incluido.
+     */
     suspend fun agregarFavorito(clienteUid: String, tallerUid: String): Result<Unit> {
         return try {
             val doc = firestore.collection("usuarios").document(clienteUid).get().await()
@@ -45,6 +51,9 @@ class FavoritosRepository {
         }
     }
 
+    /**
+     * Elimina un taller de la lista de favoritos del cliente.
+     */
     suspend fun eliminarFavorito(clienteUid: String, tallerUid: String): Result<Unit> {
         return try {
             val doc = firestore.collection("usuarios").document(clienteUid).get().await()
@@ -59,6 +68,9 @@ class FavoritosRepository {
         }
     }
 
+    /**
+     * Comprueba si un taller concreto está en la lista de favoritos del cliente.
+     */
     suspend fun esFavorito(clienteUid: String, tallerUid: String): Boolean {
         return try {
             val doc = firestore.collection("usuarios").document(clienteUid).get().await()

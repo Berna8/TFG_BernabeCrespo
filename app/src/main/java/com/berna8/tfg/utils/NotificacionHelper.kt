@@ -8,11 +8,19 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.berna8.tfg.R
 
+/**
+ * Helper para gestionar las notificaciones locales de la aplicación.
+ * Encapsula la creación del canal y el envío de notificaciones.
+ */
 object NotificacionHelper {
 
     private const val CANAL_ID = "autocita_canal"
     private const val CANAL_NOMBRE = "AutoCita"
 
+    /**
+     * Crea el canal de notificaciones requerido en Android 8 (Oreo) o superior.
+     * Debe llamarse al iniciar la app antes de mostrar cualquier notificación.
+     */
     fun crearCanal(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val canal = NotificationChannel(
@@ -27,6 +35,10 @@ object NotificacionHelper {
         }
     }
 
+    /**
+     * Muestra una notificación local con el título y mensaje indicados.
+     * Usa un ID único basado en el timestamp para evitar sobreescribir notificaciones previas.
+     */
     fun mostrarNotificacion(
         context: Context,
         titulo: String,

@@ -9,10 +9,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.berna8.tfg.ui.auth.CuentaScreen
-import com.berna8.tfg.ui.home.HomeTallerScreen
 import com.berna8.tfg.ui.home.HistorialTallerScreen
+import com.berna8.tfg.ui.home.HomeTallerScreen
 import com.berna8.tfg.ui.taller.PerfilTallerScreen
 
+/**
+ * Pantalla principal del taller con barra de navegación inferior.
+ * Gestiona las pestañas: Citas, Historial, Mi taller y Cuenta.
+ */
 @Composable
 fun PantallaTallerPrincipal(
     tallerUid: String,
@@ -28,9 +32,7 @@ fun PantallaTallerPrincipal(
                 rutaActual = rutaActual,
                 onItemSeleccionado = { ruta ->
                     navController.navigate(ruta) {
-                        popUpTo(ItemNavegacionTaller.Citas.ruta) {
-                            saveState = true
-                        }
+                        popUpTo(ItemNavegacionTaller.Citas.ruta) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -44,28 +46,16 @@ fun PantallaTallerPrincipal(
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(ItemNavegacionTaller.Citas.ruta) {
-                HomeTallerScreen(
-                    tallerUid = tallerUid
-                )
+                HomeTallerScreen(tallerUid = tallerUid)
             }
-
             composable(ItemNavegacionTaller.Historial.ruta) {
-                HistorialTallerScreen(
-                    tallerUid = tallerUid
-                )
+                HistorialTallerScreen(tallerUid = tallerUid)
             }
-
             composable(ItemNavegacionTaller.MiTaller.ruta) {
-                PerfilTallerScreen(
-                    tallerUid = tallerUid,
-                )
+                PerfilTallerScreen(tallerUid = tallerUid)
             }
-
             composable(ItemNavegacionTaller.Cuenta.ruta) {
-                CuentaScreen(
-                    uid = tallerUid,
-                    onCerrarSesion = onCerrarSesion,
-                )
+                CuentaScreen(uid = tallerUid, onCerrarSesion = onCerrarSesion)
             }
         }
     }

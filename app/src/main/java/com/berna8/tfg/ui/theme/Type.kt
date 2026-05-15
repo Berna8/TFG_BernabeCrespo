@@ -6,6 +6,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
+/**
+ * Tipografía personalizada de AutoCita.
+ * Define los estilos de texto usados en toda la aplicación.
+ */
 val Typography = Typography(
     headlineLarge = TextStyle(
         fontFamily = FontFamily.Default,

@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * Estados posibles de las operaciones del taller.
+ */
 sealed class TallerEstado {
     object Inactivo : TallerEstado()
     object Cargando : TallerEstado()
@@ -15,6 +18,10 @@ sealed class TallerEstado {
     data class Error(val mensaje: String) : TallerEstado()
 }
 
+/**
+ * ViewModel encargado de gestionar los datos del taller.
+ * Comunica la UI con TallerRepository y StorageRepository para imágenes.
+ */
 class TallerViewModel : ViewModel() {
 
     private val repositorio = TallerRepository()
@@ -28,6 +35,7 @@ class TallerViewModel : ViewModel() {
     private val _talleres = MutableStateFlow<List<Taller>>(emptyList())
     val talleres: StateFlow<List<Taller>> = _talleres
 
+    /** Carga los datos de un taller por su UID. */
     fun cargarTaller(uid: String) {
         viewModelScope.launch {
             _estado.value = TallerEstado.Cargando
@@ -41,6 +49,7 @@ class TallerViewModel : ViewModel() {
         }
     }
 
+    /** Carga la lista de todos los talleres con perfil completo. */
     fun cargarTodosTalleres() {
         viewModelScope.launch {
             _estado.value = TallerEstado.Cargando
@@ -54,14 +63,14 @@ class TallerViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Guarda el taller. Si no existe lo crea, si ya existe lo actualiza.
+     */
     fun guardarTaller(taller: Taller) {
         viewModelScope.launch {
             _estado.value = TallerEstado.Cargando
-            val resultado = if (_taller.value == null) {
-                repositorio.crearTaller(taller)
-            } else {
-                repositorio.actualizarTaller(taller)
-            }
+            val resultado = if (_taller.value == null) repositorio.crearTaller(taller)
+            else repositorio.actualizarTaller(taller)
             _estado.value = if (resultado.isSuccess) {
                 _taller.value = taller
                 TallerEstado.Exito
@@ -71,10 +80,14 @@ class TallerViewModel : ViewModel() {
         }
     }
 
+    /** Resetea el estado a Inactivo. */
     fun resetearEstado() {
         _estado.value = TallerEstado.Inactivo
     }
 
+    /**
+     * Sube una imagen del taller a Cloudinary y actualiza el taller en Firestore.
+     */
     fun subirImagen(context: android.content.Context, uri: android.net.Uri) {
         viewModelScope.launch {
             _estado.value = TallerEstado.Cargando
@@ -88,13 +101,14 @@ class TallerViewModel : ViewModel() {
                 _taller.value = tallerActualizado
                 _estado.value = TallerEstado.Exito
             } else {
-                _estado.value = TallerEstado.Error(
-                    resultado.exceptionOrNull()?.message ?: "Error al subir imagen"
-                )
+                _estado.value = TallerEstado.Error(resultado.exceptionOrNull()?.message ?: "Error al subir imagen")
             }
         }
     }
 
+    /**
+     * Elimina una imagen del taller y actualiza el taller en Firestore.
+     */
     fun eliminarImagen(url: String) {
         viewModelScope.launch {
             val nuevasImagenes = (_taller.value?.imagenes ?: emptyList()) - url

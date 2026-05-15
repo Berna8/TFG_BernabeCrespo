@@ -1,21 +1,20 @@
 package com.berna8.tfg.ui
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 
+/**
+ * Elementos de navegación de la barra inferior del cliente.
+ * Cada objeto define la ruta, título e icono de una pestaña.
+ */
 sealed class ItemNavegacion(
     val ruta: String,
     val titulo: String,
@@ -27,6 +26,10 @@ sealed class ItemNavegacion(
     object Cuenta : ItemNavegacion("cuenta_tab", "Cuenta", Icons.Default.AccountCircle)
 }
 
+/**
+ * Elementos de navegación de la barra inferior del taller.
+ * Cada objeto define la ruta, título e icono de una pestaña.
+ */
 sealed class ItemNavegacionTaller(
     val ruta: String,
     val titulo: String,
@@ -38,6 +41,10 @@ sealed class ItemNavegacionTaller(
     object Cuenta : ItemNavegacionTaller("taller_cuenta", "Cuenta", Icons.Default.AccountCircle)
 }
 
+/**
+ * Barra de navegación inferior para el cliente.
+ * Resalta en azul el elemento seleccionado.
+ */
 @Composable
 fun BarraNavegacionCliente(
     rutaActual: String,
@@ -69,6 +76,10 @@ fun BarraNavegacionCliente(
     }
 }
 
+/**
+ * Barra de navegación inferior para el taller.
+ * Resalta en azul el elemento seleccionado.
+ */
 @Composable
 fun BarraNavegacionTaller(
     rutaActual: String,

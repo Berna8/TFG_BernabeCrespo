@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * Estados posibles del proceso de autenticación.
+ */
 sealed class AuthEstado {
     object Inactivo : AuthEstado()
     object Cargando : AuthEstado()
@@ -16,6 +19,10 @@ sealed class AuthEstado {
     data class Error(val mensaje: String) : AuthEstado()
 }
 
+/**
+ * ViewModel encargado de gestionar la autenticación y los datos del usuario.
+ * Comunica la UI con AuthRepository.
+ */
 class AuthViewModel : ViewModel() {
 
     private val repositorio = AuthRepository()
@@ -29,6 +36,7 @@ class AuthViewModel : ViewModel() {
     private val _perfilActualizado = MutableStateFlow(false)
     val perfilActualizado: StateFlow<Boolean> = _perfilActualizado
 
+    /** Inicia sesión con email o nombre de usuario y contraseña. */
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _estado.value = AuthEstado.Cargando
@@ -49,6 +57,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /** Registra un nuevo usuario con nombre, email, contraseña y rol. */
     fun registrar(nombre: String, email: String, password: String, rol: String) {
         viewModelScope.launch {
             _estado.value = AuthEstado.Cargando
@@ -61,12 +70,14 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /** Reenvía el email de verificación al usuario actual. */
     fun reenviarEmailVerificacion() {
         viewModelScope.launch {
             repositorio.reenviarEmailVerificacion()
         }
     }
 
+    /** Comprueba si el usuario ha verificado su email y navega al inicio si es así. */
     fun verificarEmail() {
         viewModelScope.launch {
             _estado.value = AuthEstado.Cargando
@@ -82,6 +93,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /** Carga los datos del usuario desde Firestore forzando lectura desde servidor. */
     fun cargarUsuario(uid: String) {
         viewModelScope.launch {
             val resultado = repositorio.obtenerUsuario(uid, forceServer = true)
@@ -91,6 +103,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /** Actualiza el nombre y nombre de usuario en Firestore. */
     fun actualizarPerfil(uid: String, nombre: String, nombreUsuario: String) {
         viewModelScope.launch {
             val resultado = repositorio.actualizarPerfil(uid, nombre, nombreUsuario)
@@ -98,18 +111,25 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /** Cierra la sesión del usuario actual. */
     fun cerrarSesion() {
         repositorio.cerrarSesion()
     }
 
+    /** Resetea el estado de autenticación a Inactivo. */
     fun resetearEstado() {
         _estado.value = AuthEstado.Inactivo
     }
 
+    /** Resetea el flag de perfil actualizado. */
     fun resetearPerfilActualizado() {
         _perfilActualizado.value = false
     }
 
+    /**
+     * Sube una nueva foto de perfil a Cloudinary y actualiza la URL en Firestore.
+     * Añade un timestamp a la URL para evitar problemas de caché.
+     */
     fun subirFotoPerfil(context: android.content.Context, uri: android.net.Uri, uid: String) {
         viewModelScope.launch {
             val storageRepo = com.berna8.tfg.data.repository.StorageRepository(context)

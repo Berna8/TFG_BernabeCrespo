@@ -22,6 +22,9 @@ import com.berna8.tfg.ui.taller.ListaTalleresScreen
 import com.berna8.tfg.ui.taller.PerfilTallerScreen
 import com.google.firebase.auth.FirebaseAuth
 
+/**
+ * Objeto que centraliza todas las rutas de navegación de la aplicación.
+ */
 object Rutas {
     const val LOGIN = "login"
     const val REGISTRO = "registro"
@@ -38,6 +41,11 @@ object Rutas {
     const val TALLER_PRINCIPAL = "taller_principal/{uid}"
 }
 
+/**
+ * Composable raíz de la navegación de la aplicación.
+ * Determina la pantalla inicial según si el usuario tiene sesión activa y email verificado.
+ * Gestiona la navegación entre todas las pantallas de la app.
+ */
 @Composable
 fun NavegacionApp() {
     val navController = rememberNavController()
@@ -45,6 +53,7 @@ fun NavegacionApp() {
     val auth = FirebaseAuth.getInstance()
     val usuarioActual = auth.currentUser
 
+    // Si hay sesión activa y email verificado va a la pantalla de carga, si no al login
     val startDestination = if (usuarioActual != null && usuarioActual.isEmailVerified) {
         Rutas.CARGANDO
     } else {
@@ -55,6 +64,7 @@ fun NavegacionApp() {
         navController = navController,
         startDestination = startDestination
     ) {
+        // Pantalla de carga — determina el rol y redirige a la pantalla principal correspondiente
         composable(Rutas.CARGANDO) {
             val uid = usuarioActual?.uid ?: ""
             LaunchedEffect(Unit) {
@@ -69,10 +79,7 @@ fun NavegacionApp() {
                     }
                 }
             }
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -87,67 +94,53 @@ fun NavegacionApp() {
             }
         }
 
+        // Pantalla de login
         composable(Rutas.LOGIN) {
             LoginScreen(
                 onLoginExitoso = { rol, uid ->
                     if (rol == "taller") {
-                        navController.navigate("taller_principal/$uid") {
-                            popUpTo(Rutas.LOGIN) { inclusive = true }
-                        }
+                        navController.navigate("taller_principal/$uid") { popUpTo(Rutas.LOGIN) { inclusive = true } }
                     } else {
-                        navController.navigate("cliente_principal/$uid") {
-                            popUpTo(Rutas.LOGIN) { inclusive = true }
-                        }
+                        navController.navigate("cliente_principal/$uid") { popUpTo(Rutas.LOGIN) { inclusive = true } }
                     }
                 },
-                onIrARegistro = {
-                    navController.navigate(Rutas.REGISTRO)
-                },
-                onEmailNoVerificado = {
-                    navController.navigate(Rutas.VERIFICACION_EMAIL)
-                },
+                onIrARegistro = { navController.navigate(Rutas.REGISTRO) },
+                onEmailNoVerificado = { navController.navigate(Rutas.VERIFICACION_EMAIL) },
                 viewModel = authViewModel
             )
         }
 
+        // Pantalla de registro
         composable(Rutas.REGISTRO) {
             RegistroScreen(
                 onRegistroExitoso = { _, _ ->
-                    navController.navigate(Rutas.VERIFICACION_EMAIL) {
-                        popUpTo(Rutas.REGISTRO) { inclusive = true }
-                    }
+                    navController.navigate(Rutas.VERIFICACION_EMAIL) { popUpTo(Rutas.REGISTRO) { inclusive = true } }
                 },
-                onIrALogin = {
-                    navController.popBackStack()
-                },
+                onIrALogin = { navController.popBackStack() },
                 viewModel = authViewModel
             )
         }
 
+        // Pantalla de verificación de email
         composable(Rutas.VERIFICACION_EMAIL) {
             VerificacionEmailScreen(
                 onEmailVerificado = {
-                    navController.navigate(Rutas.LOGIN) {
-                        popUpTo(Rutas.VERIFICACION_EMAIL) { inclusive = true }
-                    }
+                    navController.navigate(Rutas.LOGIN) { popUpTo(Rutas.VERIFICACION_EMAIL) { inclusive = true } }
                 },
                 onVolver = {
-                    navController.navigate(Rutas.LOGIN) {
-                        popUpTo(0) { inclusive = true }
-                    }
+                    navController.navigate(Rutas.LOGIN) { popUpTo(0) { inclusive = true } }
                 },
                 viewModel = authViewModel
             )
         }
 
+        // Pantalla principal del cliente con navegación inferior
         composable(Rutas.CLIENTE_PRINCIPAL) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
             PantallaClientePrincipal(
                 clienteUid = uid,
                 onCerrarSesion = {
-                    navController.navigate(Rutas.LOGIN) {
-                        popUpTo(0) { inclusive = true }
-                    }
+                    navController.navigate(Rutas.LOGIN) { popUpTo(0) { inclusive = true } }
                 },
                 onTallerSeleccionado = { tallerUid ->
                     navController.navigate("detalle_taller/$uid/$tallerUid")
@@ -155,18 +148,18 @@ fun NavegacionApp() {
             )
         }
 
+        // Pantalla principal del taller con navegación inferior
         composable(Rutas.TALLER_PRINCIPAL) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
             PantallaTallerPrincipal(
                 tallerUid = uid,
                 onCerrarSesion = {
-                    navController.navigate(Rutas.LOGIN) {
-                        popUpTo(0) { inclusive = true }
-                    }
+                    navController.navigate(Rutas.LOGIN) { popUpTo(0) { inclusive = true } }
                 }
             )
         }
 
+        // Lista de talleres disponibles
         composable(Rutas.LISTA_TALLERES) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
             ListaTalleresScreen(
@@ -174,12 +167,11 @@ fun NavegacionApp() {
                 onTallerSeleccionado = { tallerUid ->
                     navController.navigate("nueva_reserva/$uid/$tallerUid")
                 },
-                onVolver = {
-                    navController.popBackStack()
-                }
+                onVolver = { navController.popBackStack() }
             )
         }
 
+        // Pantalla de nueva reserva
         composable(Rutas.NUEVA_RESERVA) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
             val tallerUid = backStackEntry.arguments?.getString("tallerUid") ?: ""
@@ -194,38 +186,34 @@ fun NavegacionApp() {
                         popUpTo("nueva_reserva/$uid/$tallerUid") { inclusive = true }
                     }
                 },
-                onVolver = {
-                    navController.popBackStack()
-                }
+                onVolver = { navController.popBackStack() }
             )
         }
 
+        // Perfil del taller
         composable(Rutas.PERFIL_TALLER) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
-            PerfilTallerScreen(
-                tallerUid = uid,
-            )
+            PerfilTallerScreen(tallerUid = uid)
         }
 
+        // Pantalla de cuenta del usuario
         composable(Rutas.CUENTA) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
             CuentaScreen(
                 uid = uid,
                 onCerrarSesion = {
-                    navController.navigate(Rutas.LOGIN) {
-                        popUpTo(0) { inclusive = true }
-                    }
+                    navController.navigate(Rutas.LOGIN) { popUpTo(0) { inclusive = true } }
                 }
             )
         }
 
+        // Historial de citas del cliente
         composable(Rutas.HISTORIAL_CITAS) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
-            HistorialCitasScreen(
-                clienteUid = uid
-            )
+            HistorialCitasScreen(clienteUid = uid)
         }
 
+        // Pantalla de confirmación de reserva con animación
         composable(Rutas.CONFIRMACION_RESERVA) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
             val servicio = java.net.URLDecoder.decode(backStackEntry.arguments?.getString("servicio") ?: "", "UTF-8")
@@ -243,26 +231,21 @@ fun NavegacionApp() {
             )
         }
 
+        // Detalle de un taller con reseñas y opción de reservar
         composable(Rutas.DETALLE_TALLER) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
             val tallerUid = backStackEntry.arguments?.getString("tallerUid") ?: ""
             val authViewModel: AuthViewModel = viewModel()
             val usuario by authViewModel.usuario.collectAsState()
 
-            LaunchedEffect(uid) {
-                authViewModel.cargarUsuario(uid)
-            }
+            LaunchedEffect(uid) { authViewModel.cargarUsuario(uid) }
 
             DetalleTallerScreen(
                 tallerUid = tallerUid,
                 clienteUid = uid,
                 clienteNombre = usuario?.nombre ?: "",
-                onReservar = {
-                    navController.navigate("nueva_reserva/$uid/$tallerUid")
-                },
-                onVolver = {
-                    navController.popBackStack()
-                }
+                onReservar = { navController.navigate("nueva_reserva/$uid/$tallerUid") },
+                onVolver = { navController.popBackStack() }
             )
         }
     }
