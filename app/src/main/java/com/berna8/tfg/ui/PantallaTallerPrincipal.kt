@@ -45,14 +45,7 @@ fun PantallaTallerPrincipal(
         ) {
             composable(ItemNavegacionTaller.Citas.ruta) {
                 HomeTallerScreen(
-                    tallerUid = tallerUid,
-                    onCerrarSesion = onCerrarSesion,
-                    onEditarPerfil = {
-                        navController.navigate(ItemNavegacionTaller.MiTaller.ruta)
-                    },
-                    onIrACuenta = {
-                        navController.navigate(ItemNavegacionTaller.Cuenta.ruta)
-                    }
+                    tallerUid = tallerUid
                 )
             }
 
@@ -65,9 +58,6 @@ fun PantallaTallerPrincipal(
             composable(ItemNavegacionTaller.MiTaller.ruta) {
                 PerfilTallerScreen(
                     tallerUid = tallerUid,
-                    onGuardado = {
-                        navController.popBackStack()
-                    }
                 )
             }
 
@@ -75,9 +65,6 @@ fun PantallaTallerPrincipal(
                 CuentaScreen(
                     uid = tallerUid,
                     onCerrarSesion = onCerrarSesion,
-                    onVolver = {
-                        navController.popBackStack()
-                    }
                 )
             }
         }

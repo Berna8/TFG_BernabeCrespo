@@ -22,9 +22,6 @@ import com.berna8.tfg.ui.reserva.ReservaViewModel
 @Composable
 fun HomeTallerScreen(
     tallerUid: String,
-    onCerrarSesion: () -> Unit,
-    onEditarPerfil: () -> Unit,
-    onIrACuenta: () -> Unit,
     viewModel: ReservaViewModel = viewModel()
 ) {
     val reservas by viewModel.reservas.collectAsState()

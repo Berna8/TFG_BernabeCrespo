@@ -73,10 +73,7 @@ fun PantallaClientePrincipal(
 
             composable(ItemNavegacion.Citas.ruta) {
                 HistorialCitasScreen(
-                    clienteUid = clienteUid,
-                    onVolver = {
-                        navController.popBackStack()
-                    }
+                    clienteUid = clienteUid
                 )
             }
 
@@ -84,9 +81,6 @@ fun PantallaClientePrincipal(
                 CuentaScreen(
                     uid = clienteUid,
                     onCerrarSesion = onCerrarSesion,
-                    onVolver = {
-                        navController.popBackStack()
-                    }
                 )
             }
         }

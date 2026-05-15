@@ -26,7 +26,6 @@ import coil.request.CachePolicy
 fun CuentaScreen(
     uid: String,
     onCerrarSesion: () -> Unit,
-    onVolver: () -> Unit,
     viewModel: AuthViewModel = viewModel()
 ) {
     val usuario by viewModel.usuario.collectAsState()

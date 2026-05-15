@@ -228,3 +228,24 @@ fun TarjetaHistorialTaller(
         }
     }
 }
+@Composable
+fun EstadoChip(estado: String) {
+    val (color, emoji) = when (estado) {
+        "confirmada" -> Pair(MaterialTheme.colorScheme.primary, "✅")
+        "completada" -> Pair(MaterialTheme.colorScheme.primary, "🏁")
+        "cancelada" -> Pair(MaterialTheme.colorScheme.error, "❌")
+        else -> Pair(MaterialTheme.colorScheme.secondary, "⏳")
+    }
+    Surface(
+        color = color.copy(alpha = 0.1f),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Text(
+            text = "$emoji ${estado.replaceFirstChar { it.uppercase() }}",
+            color = color,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}

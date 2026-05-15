@@ -45,7 +45,7 @@ class ResenaRepository {
                 .get()
                 .await()
             !resultado.isEmpty
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }

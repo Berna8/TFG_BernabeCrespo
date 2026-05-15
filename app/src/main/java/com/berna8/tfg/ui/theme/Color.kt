@@ -12,10 +12,7 @@ val NaranjaClaro = Color(0xFFFFa040)
 val NaranjaOscuro = Color(0xFFC43E00)
 
 val GrisClaro = Color(0xFFF5F5F5)
-val GrisMedio = Color(0xFF9E9E9E)
 val Blanco = Color(0xFFFFFFFF)
 val Negro = Color(0xFF212121)
 
-val Verde = Color(0xFF2E7D32)
 val Rojo = Color(0xFFC62828)
-val Amarillo = Color(0xFFF9A825)

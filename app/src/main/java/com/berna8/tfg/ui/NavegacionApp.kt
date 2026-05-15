@@ -26,8 +26,6 @@ object Rutas {
     const val LOGIN = "login"
     const val REGISTRO = "registro"
     const val VERIFICACION_EMAIL = "verificacion_email"
-    const val HOME_CLIENTE = "home_cliente/{uid}"
-    const val HOME_TALLER = "home_taller/{uid}"
     const val NUEVA_RESERVA = "nueva_reserva/{uid}/{tallerUid}"
     const val PERFIL_TALLER = "perfil_taller/{uid}"
     const val LISTA_TALLERES = "lista_talleres/{uid}"
@@ -206,9 +204,6 @@ fun NavegacionApp() {
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
             PerfilTallerScreen(
                 tallerUid = uid,
-                onGuardado = {
-                    navController.popBackStack()
-                }
             )
         }
 
@@ -216,9 +211,6 @@ fun NavegacionApp() {
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
             CuentaScreen(
                 uid = uid,
-                onVolver = {
-                    navController.popBackStack()
-                },
                 onCerrarSesion = {
                     navController.navigate(Rutas.LOGIN) {
                         popUpTo(0) { inclusive = true }
@@ -230,10 +222,7 @@ fun NavegacionApp() {
         composable(Rutas.HISTORIAL_CITAS) { backStackEntry ->
             val uid = backStackEntry.arguments?.getString("uid") ?: ""
             HistorialCitasScreen(
-                clienteUid = uid,
-                onVolver = {
-                    navController.popBackStack()
-                }
+                clienteUid = uid
             )
         }
 

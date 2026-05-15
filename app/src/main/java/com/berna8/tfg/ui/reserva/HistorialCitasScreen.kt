@@ -17,7 +17,6 @@ import com.berna8.tfg.ui.home.EstadoChip
 @Composable
 fun HistorialCitasScreen(
     clienteUid: String,
-    onVolver: () -> Unit,
     viewModel: ReservaViewModel = viewModel()
 ) {
     val reservas by viewModel.reservas.collectAsState()

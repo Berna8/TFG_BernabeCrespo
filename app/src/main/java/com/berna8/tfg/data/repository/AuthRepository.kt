@@ -115,7 +115,7 @@ class AuthRepository {
         return try {
             val doc = firestore.collection("usuarios").document(uid).get().await()
             doc.getString("rol") ?: "cliente"
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             "cliente"
         }
     }

@@ -7,13 +7,13 @@ import kotlinx.coroutines.tasks.await
 class FavoritosRepository {
 
     private val firestore = FirebaseFirestore.getInstance()
-
     suspend fun obtenerFavoritos(clienteUid: String): Result<List<Taller>> {
         return try {
             val doc = firestore.collection("usuarios")
                 .document(clienteUid)
                 .get()
                 .await()
+            @Suppress("UNCHECKED_CAST")
             val tallerIds = doc.get("favoritos") as? List<String> ?: emptyList()
             val talleres = mutableListOf<Taller>()
             tallerIds.forEach { tallerId ->
@@ -32,6 +32,7 @@ class FavoritosRepository {
     suspend fun agregarFavorito(clienteUid: String, tallerUid: String): Result<Unit> {
         return try {
             val doc = firestore.collection("usuarios").document(clienteUid).get().await()
+            @Suppress("UNCHECKED_CAST")
             val favoritos = (doc.get("favoritos") as? List<String> ?: emptyList()).toMutableList()
             if (!favoritos.contains(tallerUid)) {
                 favoritos.add(tallerUid)
@@ -47,6 +48,7 @@ class FavoritosRepository {
     suspend fun eliminarFavorito(clienteUid: String, tallerUid: String): Result<Unit> {
         return try {
             val doc = firestore.collection("usuarios").document(clienteUid).get().await()
+            @Suppress("UNCHECKED_CAST")
             val favoritos = (doc.get("favoritos") as? List<String> ?: emptyList()).toMutableList()
             favoritos.remove(tallerUid)
             firestore.collection("usuarios").document(clienteUid)
@@ -60,9 +62,10 @@ class FavoritosRepository {
     suspend fun esFavorito(clienteUid: String, tallerUid: String): Boolean {
         return try {
             val doc = firestore.collection("usuarios").document(clienteUid).get().await()
+            @Suppress("UNCHECKED_CAST")
             val favoritos = doc.get("favoritos") as? List<String> ?: emptyList()
             favoritos.contains(tallerUid)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }

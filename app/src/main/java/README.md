@@ -1,4 +1,4 @@
-Titulo: APP de reserva en taller mecanico
+Titulo: Autocita
 
 Descripcion: Voy a crear una apliacion de movil en android studio para agilizar la reserva de una 
 cita en el taller mecanico que desees.

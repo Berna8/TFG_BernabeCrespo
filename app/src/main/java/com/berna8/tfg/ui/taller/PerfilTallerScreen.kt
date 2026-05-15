@@ -29,7 +29,6 @@ import com.berna8.tfg.data.model.Taller
 @Composable
 fun PerfilTallerScreen(
     tallerUid: String,
-    onGuardado: () -> Unit,
     viewModel: TallerViewModel = viewModel()
 ) {
     val estado by viewModel.estado.collectAsState()
@@ -55,7 +54,7 @@ fun PerfilTallerScreen(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { viewModel.subirImagen(context, it, tallerUid) }
+        uri?.let { viewModel.subirImagen(context, it) }
     }
 
     LaunchedEffect(tallerUid) {
@@ -267,7 +266,7 @@ fun PerfilTallerScreen(
                             contentScale = ContentScale.Crop
                         )
                         IconButton(
-                            onClick = { viewModel.eliminarImagen(url, tallerUid) },
+                            onClick = { viewModel.eliminarImagen(url) },
                             modifier = Modifier.align(Alignment.TopEnd)
                         ) {
                             Icon(
